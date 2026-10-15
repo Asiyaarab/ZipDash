@@ -228,7 +228,7 @@
     <!-- BOTTOM NAVIGATION FOOTER -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e6e2dd] py-2.5 px-8 z-40 max-w-md md:max-w-4xl mx-auto shadow-lg">
         <div class="flex justify-around items-center text-stone-600">
-            <a href="final.html" class="flex flex-col items-center gap-1 text-[#1b4332] font-bold text-[10px] transition">
+            <a href="index.html" class="flex flex-col items-center gap-1 text-[#1b4332] font-bold text-[10px] transition">
                 <i class="fa-solid fa-house text-base"></i>
                 <span>Home</span>
             </a>
@@ -236,7 +236,7 @@
                 <i class="fa-solid fa-tags text-base"></i>
                 <span>Offers</span>
             </a>
-            <a href="cart.html" onclick="toggleCart(); return false;" class="flex flex-col items-center gap-1 hover:text-[#1b4332] text-stone-400 font-medium text-[10px] relative transition">
+            <a href="#" onclick="toggleCart(); return false;" class="flex flex-col items-center gap-1 hover:text-[#1b4332] text-stone-400 font-medium text-[10px] relative transition">
                 <div class="relative">
                     <i class="fa-solid fa-cart-shopping text-base"></i>
                     <span id="cartFooterBadge" class="absolute -top-1.5 -right-2 bg-rose-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
@@ -337,7 +337,24 @@
         </div>
     </div>
 
-    <script>
+    <!-- FIREBASE & APP SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0tzieCwONq_78PdvnD4KikuNGM1_heGA",
+            authDomain: "zipdash-f79b4.firebaseapp.com",
+            projectId: "zipdash-f79b4",
+            storageBucket: "zipdash-f79b4.firebasestorage.app",
+            messagingSenderId: "877082429491",
+            appId: "1:877082429491:web:903204df5b0ec1369abb46",
+            measurementId: "G-HJCPPBRVG2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         const ADMIN_EMAIL = "aashiyaarab39@gmail.com";
 
         const products = [
@@ -358,6 +375,7 @@
         let activeCategory = 'all';
         let appliedDiscount = 0;
         let heartTimer = null;
+        let liveOrdersList = [];
 
         const uniqueQuotes = [
             "❤️ \"Your order just made our day brighter! Freshness is on its way to your doorstep.\"",
@@ -374,11 +392,18 @@
             }
             renderProducts();
             updateCartUI();
-            checkActiveOrderStatus();
-            setInterval(checkActiveOrderStatus, 3000); // Check status update every 3 seconds automatically
+
+            // Real-time listener from Firestore database
+            onSnapshot(collection(db, "orders"), (snapshot) => {
+                liveOrdersList = [];
+                snapshot.forEach((docSnap) => {
+                    liveOrdersList.push({ docId: docSnap.id, ...docSnap.data() });
+                });
+                checkActiveOrderStatus();
+            });
         });
 
-        function handleSmartLogin() {
+        window.handleSmartLogin = function() {
             const emailInput = document.getElementById('custLoginInput').value.trim().toLowerCase();
             if (!emailInput || !emailInput.includes('@')) {
                 alert('Please enter a valid email address.');
@@ -392,14 +417,12 @@
                 localStorage.setItem('zipdash_customer_auth', emailInput);
                 document.getElementById('customerLoginModal').classList.add('hidden');
             }
-        }
+        };
 
         function checkActiveOrderStatus() {
             let activeOrderId = localStorage.getItem('zipdash_current_order_id');
-            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
-            let currentOrder = allOrders.find(o => o.id === activeOrderId);
+            let currentOrder = liveOrdersList.find(o => o.id === activeOrderId);
 
-            // Agar order Delivered ya Cancelled ho gaya hai, toh active order ID hata do aur tracking band kardo
             if (!currentOrder || currentOrder.status === 'Delivered' || currentOrder.status === 'Cancelled') {
                 if (activeOrderId) {
                     localStorage.removeItem('zipdash_current_order_id');
@@ -409,18 +432,15 @@
                 return;
             }
 
-            // Agar order active hai
             document.getElementById('activeOrderBanner').classList.remove('hidden');
             document.getElementById('trackBtnHeader').classList.remove('hidden');
 
-            // Populate order details inside live tracking modal
             document.getElementById('modalOrderIdText').innerText = `Order ID: ${currentOrder.id}`;
             document.getElementById('modalOrderStatusText').innerText = `Status: ${currentOrder.status}`;
             document.getElementById('modalOrderItemsText').innerText = currentOrder.items;
             document.getElementById('modalOrderAddressText').innerText = currentOrder.address;
             document.getElementById('modalOrderTotalText').innerText = `₹${currentOrder.total}`;
 
-            // Check if rider is assigned
             if (currentOrder.riderName && currentOrder.riderName.trim() !== "") {
                 document.getElementById('riderStatusBadge').innerText = "Delivery partner assigned 🛵";
                 document.getElementById('riderStatusBadge').className = "text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded";
@@ -428,8 +448,6 @@
                 document.getElementById('riderPhoneText').innerText = `📞 ${currentOrder.riderPhone || 'N/A'}`;
                 document.getElementById('riderCallBtn').href = `tel:${currentOrder.riderPhone}`;
                 document.getElementById('riderCallBtn').classList.remove('hidden');
-                
-                // Hide cancel button once rider is assigned
                 document.getElementById('cancelOrderBtn').classList.add('hidden');
             } else {
                 document.getElementById('riderStatusBadge').innerText = "Delivery partner will be assigned ⏳";
@@ -437,13 +455,11 @@
                 document.getElementById('riderNameText').innerText = "Waiting for assignment...";
                 document.getElementById('riderPhoneText').innerText = "📞 Store team is reviewing order";
                 document.getElementById('riderCallBtn').classList.add('hidden');
-                
-                // Show cancel button if rider is not yet assigned
                 document.getElementById('cancelOrderBtn').classList.remove('hidden');
             }
         }
 
-        function toggleWishlist(id) {
+        window.toggleWishlist = function(id) {
             const index = wishlist.indexOf(id);
             if (index > -1) {
                 wishlist.splice(index, 1);
@@ -453,9 +469,9 @@
             localStorage.setItem('zipdash_wishlist', JSON.stringify(wishlist));
             renderProducts();
             if (!document.getElementById('profileModal').classList.contains('hidden')) {
-                openUserProfile();
+                window.openUserProfile();
             }
-        }
+        };
 
         function renderProducts() {
             const grid = document.getElementById('productGrid');
@@ -505,7 +521,7 @@
             });
         }
 
-        function filterCategory(cat) {
+        window.filterCategory = function(cat) {
             activeCategory = cat;
             document.querySelectorAll('.cat-btn').forEach(btn => {
                 btn.classList.remove('bg-[#1b4332]', 'text-white');
@@ -516,11 +532,11 @@
                 document.getElementById(`cat-${cat}`).classList.remove('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]');
             }
             renderProducts();
-        }
+        };
 
-        function filterProducts() { renderProducts(); }
+        window.filterProducts = function() { renderProducts(); };
 
-        function updateQty(id, change) {
+        window.updateQty = function(id, change) {
             if (!cart[id]) {
                 if (change > 0) cart[id] = { ...products.find(p => p.id === id), qty: 1 };
             } else {
@@ -529,7 +545,7 @@
             }
             updateCartUI();
             renderProducts();
-        }
+        };
 
         function updateCartUI() {
             const badge = document.getElementById('cartBadge');
@@ -593,24 +609,23 @@
             document.getElementById('totalPayable').innerText = `₹${finalPayable}`;
         }
 
-        function toggleCart() { document.getElementById('cartModal').classList.toggle('hidden'); }
+        window.toggleCart = function() { document.getElementById('cartModal').classList.toggle('hidden'); };
 
-        function openUserProfile() {
+        window.openUserProfile = function() {
             const savedEmail = localStorage.getItem('zipdash_customer_auth') || 'Not logged in';
             let userName = savedEmail.includes('@') ? savedEmail.split('@')[0].toUpperCase() : "CUSTOMER";
 
             document.getElementById('profileGreetingName').innerText = `HEY, ${userName}`;
             document.getElementById('profileUserEmail').innerText = savedEmail;
 
-            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
-            let userOrders = allOrders.filter(o => o.customerEmail === savedEmail);
+            let userOrders = liveOrdersList.filter(o => o.customerEmail === savedEmail);
             let ordersContainer = document.getElementById('profileOrdersList');
             
             if (userOrders.length === 0) {
                 ordersContainer.innerHTML = `<p class="text-stone-400 italic text-[11px]">No orders found.</p>`;
             } else {
                 ordersContainer.innerHTML = '';
-                userOrders.reverse().forEach(ord => {
+                userOrders.slice().reverse().forEach(ord => {
                     ordersContainer.innerHTML += `
                         <div class="bg-white p-2 rounded-lg border border-stone-200 text-[11px]">
                             <div class="flex justify-between font-bold text-[#1b4332]">
@@ -648,29 +663,29 @@
             }
 
             document.getElementById('profileModal').classList.remove('hidden');
-        }
+        };
 
-        function toggleProfileSection(section) {
+        window.toggleProfileSection = function(section) {
             if (section === 'orders') {
                 document.getElementById('profileOrdersList').classList.toggle('hidden');
             } else if (section === 'wishlist') {
                 document.getElementById('profileWishlistList').classList.toggle('hidden');
             }
-        }
+        };
 
-        function closeUserProfile() { document.getElementById('profileModal').classList.add('hidden'); }
-        function logoutCustomer() { localStorage.removeItem('zipdash_customer_auth'); location.reload(); }
+        window.closeUserProfile = function() { document.getElementById('profileModal').classList.add('hidden'); };
+        window.logoutCustomer = function() { localStorage.removeItem('zipdash_customer_auth'); location.reload(); };
 
-        function applyPromo() {
+        window.applyPromo = function() {
             if (document.getElementById('promoInput').value.trim().toUpperCase() === 'WELCOME10') {
                 appliedDiscount = 10;
                 confetti({ particleCount: 50, spread: 60 });
                 alert('Promo applied! ₹10 off.');
             } else { alert('Invalid code.'); }
             updateCartUI();
-        }
+        };
 
-        function placeOrderAction() {
+        window.placeOrderAction = async function() {
             const name = document.getElementById('custNameInput').value.trim();
             const mobile = document.getElementById('custMobileInput').value.trim();
             const address = document.getElementById('deliveryAddress').value.trim().toLowerCase();
@@ -708,7 +723,7 @@
                 address: address,
                 items: itemsSummary.join(', '),
                 total: finalTotal,
-                paymentMode:paymentMode,
+                paymentMode: paymentMode,
                 status: 'Pending',
                 riderName: '',
                 riderPhone: '',
@@ -716,33 +731,37 @@
                 date: new Date().toISOString()
             };
 
-            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
-            allOrders.push(newOrder);
-            localStorage.setItem('zipdash_all_orders', JSON.stringify(allOrders));
-            localStorage.setItem('zipdash_current_order_id', orderId);
+            try {
+                // Save order directly to Firestore database
+                await addDoc(collection(db, "orders"), newOrder);
+                localStorage.setItem('zipdash_current_order_id', orderId);
 
-            let message = `🧾 *OFFICIAL BILL INVOICE - ZipDash*\n\n`;
-            message += `👤 *Customer:* ${name} (${mobile})\n`;
-            message += `📍 *Address:* ${address}\n`;
-            message += `💳 *Payment:* ${paymentMode}\n\n`;
-            message += `🛒 *Items:* ${itemsSummary.join(', ')}\n`;
-            message += `*Total Payable:* ₹${finalTotal}\n\n🎉 Thank you!`;
+                let message = `🧾 *OFFICIAL BILL INVOICE - ZipDash*\n\n`;
+                message += `👤 *Customer:* ${name} (${mobile})\n`;
+                message += `📍 *Address:* ${address}\n`;
+                message += `💳 *Payment:* ${paymentMode}\n\n`;
+                message += `🛒 *Items:* ${itemsSummary.join(', ')}\n`;
+                message += `*Total Payable:* ₹${finalTotal}\n\n🎉 Thank you!`;
 
-            const hiddenIframe = document.createElement('iframe');
-            hiddenIframe.style.display = 'none';
-            hiddenIframe.src = `https://api.whatsapp.com/send?phone=919876543210&text=${encodeURIComponent(message)}`;
-            document.body.appendChild(hiddenIframe);
+                const hiddenIframe = document.createElement('iframe');
+                hiddenIframe.style.display = 'none';
+                hiddenIframe.src = `https://api.whatsapp.com/send?phone=919876543210&text=${encodeURIComponent(message)}`;
+                document.body.appendChild(hiddenIframe);
 
-            toggleCart();
-            triggerHeartBoxAnimation();
-            checkActiveOrderStatus();
+                toggleCart();
+                triggerHeartBoxAnimation();
+                checkActiveOrderStatus();
 
-            if (paymentMode === 'Online') {
-                const businessUpiId = "yourname@oksbi"; 
-                const upiUrl = `upi://pay?pa=${businessUpiId}&pn=${encodeURIComponent("ZipDash Store")}&am=${finalTotal}&cu=INR&tn=Order_${orderId}`;
-                setTimeout(() => { window.location.href = upiUrl; }, 1500);
+                if (paymentMode === 'Online') {
+                    const businessUpiId = "yourname@oksbi"; 
+                    const upiUrl = `upi://pay?pa=${businessUpiId}&pn=${encodeURIComponent("ZipDash Store")}&am=${finalTotal}&cu=INR&tn=Order_${orderId}`;
+                    setTimeout(() => { window.location.href = upiUrl; }, 1500);
+                }
+            } catch (error) {
+                console.error("Error adding order: ", error);
+                alert("Failed to place order. Please try again.");
             }
-        }
+        };
 
         function triggerHeartBoxAnimation() {
             document.getElementById('uniqueQuoteText').innerText = uniqueQuotes[Math.floor(Math.random() * uniqueQuotes.length)];
@@ -763,23 +782,21 @@
             }, 1000);
         }
 
-        function closeHeartBoxAndTrack() {
+        window.closeHeartBoxAndTrack = function() {
             if(heartTimer) clearInterval(heartTimer);
             document.getElementById('heartBoxModal').classList.add('hidden');
-            openLiveTracking();
-        }
+            window.openLiveTracking();
+        };
 
-        function openLiveTracking() {
+        window.openLiveTracking = function() {
             checkActiveOrderStatus();
             let activeOrderId = localStorage.getItem('zipdash_current_order_id');
-            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
-            let currentOrder = allOrders.find(o => o.id === activeOrderId);
+            let currentOrder = liveOrdersList.find(o => o.id === activeOrderId);
 
             if (currentOrder && currentOrder.address) {
                 let encodedAddress = encodeURIComponent(currentOrder.address + ", Mumbai");
                 document.getElementById('liveMapFrame').src = `https://maps.google.com/maps?q=${encodedAddress}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
                 
-                // Populate modal details again on open
                 document.getElementById('modalOrderIdText').innerText = `Order ID: ${currentOrder.id}`;
                 document.getElementById('modalOrderStatusText').innerText = `Status: ${currentOrder.status}`;
                 document.getElementById('modalOrderItemsText').innerText = currentOrder.items;
@@ -788,40 +805,42 @@
             }
 
             document.getElementById('liveTrackingModal').classList.remove('hidden');
-        }
+        };
 
-        function closeLiveTracking() { document.getElementById('liveTrackingModal').classList.add('hidden'); }
+        window.closeLiveTracking = function() { document.getElementById('liveTrackingModal').classList.add('hidden'); };
 
-        function cancelActiveOrder() {
+        window.cancelActiveOrder = async function() {
             let activeOrderId = localStorage.getItem('zipdash_current_order_id');
-            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
-            let ord = allOrders.find(o => o.id === activeOrderId);
-            if (ord) {
-                ord.status = 'Cancelled';
-                localStorage.setItem('zipdash_all_orders', JSON.stringify(allOrders));
-                localStorage.removeItem('zipdash_current_order_id');
-                
-                cart = {};
-                updateCartUI();
-                renderProducts();
+            let ord = liveOrdersList.find(o => o.id === activeOrderId);
+            if (ord && ord.docId) {
+                try {
+                    await updateDoc(doc(db, "orders", ord.docId), { status: 'Cancelled' });
+                    localStorage.removeItem('zipdash_current_order_id');
+                    
+                    cart = {};
+                    updateCartUI();
+                    renderProducts();
 
-                alert('Order Cancelled Successfully.');
-                closeLiveTracking();
-                checkActiveOrderStatus();
+                    alert('Order Cancelled Successfully.');
+                    closeLiveTracking();
+                    checkActiveOrderStatus();
+                } catch (e) {
+                    console.error("Error cancelling order:", e);
+                }
             }
-        }
+        };
 
-        function sendChatMessage() {
+        window.sendChatMessage = function() {
             const input = document.getElementById('chatInput');
             if (!input.value.trim()) return;
             const chatBox = document.getElementById('chatMessagesBox');
             chatBox.innerHTML += `<div class="bg-stone-100 text-stone-800 p-2 rounded-xl text-[11px] w-fit max-w-[85%] ml-auto font-medium">${input.value}</div>`;
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        };
 
-        function startVoiceOrder() { alert('Voice search ready.'); }
-        function closeVoiceModal() {}
+        window.startVoiceOrder = function() { alert('Voice search ready.'); };
+        window.closeVoiceModal = function() {};
     </script>
 </body>
 </html>
