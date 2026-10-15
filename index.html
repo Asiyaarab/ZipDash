@@ -117,6 +117,11 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
   </div>
 </div>
 
+<div id="cancelledOrderBanner" class="bg-rose-600 text-white text-xs py-2 px-4 text-center font-bold shadow-md hidden flex items-center justify-center gap-2">
+  <i class="fa-solid fa-circle-xmark text-sm"></i>
+  <span>Your order has been cancelled successfully.</span>
+</div>
+
 <div class="bg-[#1b4332] text-white text-xs py-2 px-4 text-center font-bold shadow-inner flex items-center justify-center gap-2 border-b border-[#143225]">
   <i class="fa-solid fa-gift text-[#d4a373]"></i><span>Unlock FREE Delivery on orders above ₹100!</span>
 </div>
@@ -156,7 +161,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
     </div>
     <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-2 text-xs">
       <div class="flex justify-between font-extrabold text-[#1b4332]"><span id="modalOrderIdText">Order ID: #---</span><span id="modalOrderStatusText" class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">Status: Pending</span></div>
-      <div class="text-stone-700 border-t border-emerald-100/60 pt-2"><p class="font-bold text-[11px] text-stone-900 mb-0.5">🛒 Ordered Items:</p><p id="modalOrderItemsText" class="text-stone-600 text-[11px]">Loading items...</p></div>
+      <div class="text-stone-700 border-t border-emerald-100/60 pt-2"><p class="font-bold text-[11px] text-stone-900 mb-0.5">🛒 Ordered Items & Customer Info:</p><p id="modalOrderItemsText" class="text-stone-600 text-[11px]">Loading items...</p></div>
       <div class="flex justify-between text-stone-700 border-t border-emerald-100/60 pt-2 font-bold"><span>Delivery Address:</span><span id="modalOrderAddressText" class="text-right text-stone-600 font-medium truncate max-w-[200px]">---</span></div>
       <div class="flex justify-between text-[#1b4332] font-extrabold pt-1 border-t border-emerald-100/60"><span>Total Amount Paid:</span><span id="modalOrderTotalText">₹0</span></div>
     </div>
@@ -275,7 +280,6 @@ const defaultInventory = [
     { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, mrp: 55, badge: "FAMILY PACK", stock: 20 }
 ];
 
-// Admin panel wali same key yahan bhi use hogi
 let products = JSON.parse(localStorage.getItem('zipdash_admin_inventory_v2') || JSON.stringify(defaultInventory));
 const availableOffers = [
   { code: "WELCOME10", discount: "₹10 OFF", minOrder: 99, desc: "Valid on orders above ₹99." },
@@ -284,7 +288,6 @@ const availableOffers = [
   { code: "SNACK15", discount: "₹15 OFF", minOrder: 75, desc: "Valid on orders above ₹75." },
   { code: "ZIPSUPER", discount: "₹30 OFF", minOrder: 199, desc: "Valid on orders above ₹199." }
 ];
-
 
 let cart = {};
 let wishlist = JSON.parse(localStorage.getItem('zipdash_wishlist') || '[]');
@@ -370,15 +373,18 @@ function copyOfferCode(code, minOrder) {
 }
 
 function handleSmartLogin() {
-  const email = document.getElementById('custLoginInput').value.trim().toLowerCase();
-  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
-  if (email === ADMIN_EMAIL) {
-    alert('Admin email recognized! Redirecting to Admin Panel...');
-    window.location.href = 'admin.html';
+  const emailInput = document.getElementById('custLoginInput').value.trim().toLowerCase();
+  if (!emailInput || !emailInput.includes('@')) {
+    alert('Please enter a valid email address.');
     return;
   }
-  localStorage.setItem('zipdash_customer_auth', email);
-  document.getElementById('customerLoginModal').classList.add('hidden');
+
+  if (emailInput === ADMIN_EMAIL) {
+    window.location.href = 'admin.html'; 
+  } else {
+    localStorage.setItem('zipdash_customer_auth', emailInput);
+    document.getElementById('customerLoginModal').classList.add('hidden');
+  }
 }
 
 function checkActiveOrderStatus() {
@@ -393,11 +399,15 @@ function checkActiveOrderStatus() {
   }
   document.getElementById('activeOrderBanner').classList.remove('hidden');
   document.getElementById('trackBtnHeader').classList.remove('hidden');
+  
+  // Update Order & Customer info in Tracking Modal
   document.getElementById('modalOrderIdText').innerText = `Order ID: ${cur.id}`;
   document.getElementById('modalOrderStatusText').innerText = `Status: ${cur.status}`;
-  document.getElementById('modalOrderItemsText').innerText = cur.items;
+  document.getElementById('modalOrderItemsText').innerHTML = `<b>Customer:</b> ${cur.customerName} (${cur.customerMobile})<br>🛒 <b>Items:</b> ${cur.items}`;
   document.getElementById('modalOrderAddressText').innerText = cur.address;
   document.getElementById('modalOrderTotalText').innerText = `₹${cur.total}`;
+
+  // Update Delivery Partner details in Tracking Modal dynamically
   if (cur.riderName && cur.riderName.trim() !== "") {
     document.getElementById('riderStatusBadge').innerText = "Delivery partner assigned 🛵";
     document.getElementById('riderStatusBadge').className = "text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded";
@@ -666,7 +676,7 @@ function openLiveTracking() {
     document.getElementById('liveMapFrame').src = `https://maps.google.com/maps?q=${encodeURIComponent(cur.address + ", Mumbai")}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
     document.getElementById('modalOrderIdText').innerText = `Order ID: ${cur.id}`;
     document.getElementById('modalOrderStatusText').innerText = `Status: ${cur.status}`;
-    document.getElementById('modalOrderItemsText').innerText = cur.items;
+    document.getElementById('modalOrderItemsText').innerHTML = `<b>Customer:</b> ${cur.customerName} (${cur.customerMobile})<br>🛒 <b>Items:</b> ${cur.items}`;
     document.getElementById('modalOrderAddressText').innerText = cur.address;
     document.getElementById('modalOrderTotalText').innerText = `₹${cur.total}`;
   }
@@ -683,8 +693,15 @@ function cancelActiveOrder() {
     localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
     localStorage.removeItem('zipdash_current_order_id');
     cart = {}; updateCartUI(); renderProducts();
-    alert('Order Cancelled Successfully.');
-    closeLiveTracking(); checkActiveOrderStatus();
+    
+    closeLiveTracking();
+    checkActiveOrderStatus();
+    
+    const cancelBanner = document.getElementById('cancelledOrderBanner');
+    cancelBanner.classList.remove('hidden');
+    setTimeout(() => {
+      cancelBanner.classList.add('hidden');
+    }, 4000);
   }
 }
 function sendChatMessage() {
