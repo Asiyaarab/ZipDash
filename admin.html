@@ -1,368 +1,415 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZipDash - Store Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfbf9; color: #2b2b2b; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ZipDash - Store Admin Panel</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.left-3\.5{left:.875rem}.top-0{top:0}.top-3{top:.75rem}.z-30{z-index:30}.z-50{z-index:50}.col-span-2{grid-column:span 2/span 2}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:.25rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-9{height:2.25rem}.min-h-screen{min-height:100vh}.w-8{width:2rem}.w-9{width:2.25rem}.w-full{width:100%}.min-w-\[2\.25rem\]{min-width:2.25rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.space-x-2>:not([hidden])~:not([hidden]){--tw-space-x-reverse:0;margin-right:calc(.5rem*var(--tw-space-x-reverse));margin-left:calc(.5rem*(1 - var(--tw-space-x-reverse)))}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-2\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.625rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.625rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.overflow-x-auto{overflow-x:auto}.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-\[\#d4a373\]{--tw-border-opacity:1;border-color:rgb(212 163 115/var(--tw-border-opacity,1))}.border-\[\#e6e2dd\]{--tw-border-opacity:1;border-color:rgb(230 226 221/var(--tw-border-opacity,1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208/var(--tw-border-opacity,1))}.border-stone-100{--tw-border-opacity:1;border-color:rgb(245 245 244/var(--tw-border-opacity,1))}.bg-\[\#1b4332\]{--tw-bg-opacity:1;background-color:rgb(27 67 50/var(--tw-bg-opacity,1))}.bg-\[\#d4a373\]{--tw-bg-opacity:1;background-color:rgb(212 163 115/var(--tw-bg-opacity,1))}.bg-\[\#d4a373\]\/30{background-color:hsla(30,53%,64%,.3)}.bg-\[\#fcfbf9\]{--tw-bg-opacity:1;background-color:rgb(252 251 249/var(--tw-bg-opacity,1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-black\/60{background-color:rgba(0,0,0,.6)}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229/var(--tw-bg-opacity,1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245/var(--tw-bg-opacity,1))}.bg-emerald-50\/50{background-color:rgba(236,253,245,.5)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105/var(--tw-bg-opacity,1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230/var(--tw-bg-opacity,1))}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242/var(--tw-bg-opacity,1))}.bg-stone-200\/70{background-color:hsla(20,6%,90%,.7)}.bg-stone-50{--tw-bg-opacity:1;background-color:rgb(250 250 249/var(--tw-bg-opacity,1))}.bg-stone-800{--tw-bg-opacity:1;background-color:rgb(41 37 36/var(--tw-bg-opacity,1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.p-1\.5{padding:.375rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-1{padding-bottom:.25rem}.pb-2{padding-bottom:.5rem}.pb-20{padding-bottom:5rem}.pb-3{padding-bottom:.75rem}.pl-9{padding-left:2.25rem}.pr-8{padding-right:2rem}.pt-2{padding-top:.5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-\[10px\]{font-size:10px}.text-\[9px\]{font-size:9px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-tight{line-height:1.25}.text-\[\#1b4332\]{--tw-text-opacity:1;color:rgb(27 67 50/var(--tw-text-opacity,1))}.text-\[\#d4a373\]{--tw-text-opacity:1;color:rgb(212 163 115/var(--tw-text-opacity,1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14/var(--tw-text-opacity,1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208/var(--tw-text-opacity,1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105/var(--tw-text-opacity,1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87/var(--tw-text-opacity,1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70/var(--tw-text-opacity,1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59/var(--tw-text-opacity,1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60/var(--tw-text-opacity,1))}.text-rose-800{--tw-text-opacity:1;color:rgb(159 18 57/var(--tw-text-opacity,1))}.text-stone-400{--tw-text-opacity:1;color:rgb(168 162 158/var(--tw-text-opacity,1))}.text-stone-500{--tw-text-opacity:1;color:rgb(120 113 108/var(--tw-text-opacity,1))}.text-stone-600{--tw-text-opacity:1;color:rgb(87 83 78/var(--tw-text-opacity,1))}.text-stone-700{--tw-text-opacity:1;color:rgb(68 64 60/var(--tw-text-opacity,1))}.text-stone-800{--tw-text-opacity:1;color:rgb(41 37 36/var(--tw-text-opacity,1))}.text-stone-900{--tw-text-opacity:1;color:rgb(28 25 23/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgba(0,0,0,.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color)}.shadow-2xl,.shadow-md{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.hover\:bg-\[\#143225\]:hover{--tw-bg-opacity:1;background-color:rgb(20 50 37/var(--tw-bg-opacity,1))}.hover\:bg-\[\#c39263\]:hover{--tw-bg-opacity:1;background-color:rgb(195 146 99/var(--tw-bg-opacity,1))}.hover\:bg-\[\#d4a373\]\/50:hover{background-color:hsla(30,53%,64%,.5)}.hover\:bg-amber-600:hover{--tw-bg-opacity:1;background-color:rgb(217 119 6/var(--tw-bg-opacity,1))}.hover\:bg-emerald-100:hover{--tw-bg-opacity:1;background-color:rgb(209 250 229/var(--tw-bg-opacity,1))}.hover\:bg-emerald-700:hover{--tw-bg-opacity:1;background-color:rgb(4 120 87/var(--tw-bg-opacity,1))}.hover\:bg-rose-100:hover{--tw-bg-opacity:1;background-color:rgb(255 228 230/var(--tw-bg-opacity,1))}.hover\:bg-stone-900:hover{--tw-bg-opacity:1;background-color:rgb(28 25 23/var(--tw-bg-opacity,1))}.hover\:text-stone-700:hover{--tw-text-opacity:1;color:rgb(68 64 60/var(--tw-text-opacity,1))}.focus\:border-\[\#1b4332\]:focus{--tw-border-opacity:1;border-color:rgb(27 67 50/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width:768px){.md\:max-w-4xl{max-width:56rem}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: #fcfbf9; color: #2b2b2b; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 </head>
 <body class="bg-[#fcfbf9] min-h-screen pb-20">
 
-    <!-- ADMIN HEADER -->
-    <header class="bg-[#1b4332] text-white px-4 py-4 sticky top-0 z-30 shadow-md">
-        <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <div class="w-9 h-9 rounded-xl bg-[#d4a373] flex items-center justify-center text-[#1b4332] font-bold text-lg">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-base leading-tight">Store Admin</h1>
-                    <p class="text-[10px] text-emerald-200">Stock & Live Order Management</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="openAddItemModal()" class="bg-[#d4a373] hover:bg-[#c39263] text-stone-900 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Add Item
-                </button>
-                <button onclick="goToStoreAsCustomer()" class="bg-stone-800 hover:bg-stone-900 text-white px-3 py-2 rounded-xl text-xs transition flex items-center gap-1 font-semibold" title="Back to Store">
-                    <i class="fa-solid fa-store"></i> Store
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- DELIVERY ASSIGNMENT MODAL -->
-    <div id="assignDeliveryModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
-            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-                <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-2">
-                    <i class="fa-solid fa-motorcycle text-[#d4a373]"></i> Assign Delivery Partner
-                </h3>
-                <button onclick="closeAssignModal()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <input type="hidden" id="assignDocId">
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-stone-700 mb-1">Delivery Partner Name *</label>
-                    <input type="text" id="riderNameInput" placeholder="e.g. Ramesh Kumar" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                </div>
-                <div>
-                    <label class="block font-bold text-stone-700 mb-1">Mobile Number *</label>
-                    <input type="tel" id="riderPhoneInput" placeholder="e.g. 9876543210" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                </div>
-                <div>
-                    <label class="block font-bold text-stone-700 mb-1">Email (Optional)</label>
-                    <input type="email" id="riderEmailInput" placeholder="rider@zipdash.com" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                </div>
-                <button onclick="saveDeliveryAssignment()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md mt-2">
-                    Dispatch & Mark Out for Delivery 🛵
-                </button>
-            </div>
-        </div>
+<header class="bg-[#1b4332] text-white px-4 py-4 sticky top-0 z-30 shadow-md">
+  <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <div class="w-9 h-9 rounded-xl border-2 border-[#d4a373] flex items-center justify-center text-[#d4a373] font-bold text-lg"><i class="fa-solid fa-boxes-stacked"></i></div>
+      <div>
+        <h1 class="font-extrabold text-base leading-tight">Store Admin</h1>
+        <p class="text-[10px] text-emerald-200">Stock & Live Order Management</p>
+      </div>
     </div>
-
-    <!-- ADD ITEM MODAL -->
-    <div id="addItemModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
-            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-                <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus text-[#d4a373]"></i> Add New Product to Store
-                </h3>
-                <button onclick="closeAddItemModal()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-stone-700 mb-1">Category *</label>
-                    <select id="newItemCategory" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                        <option value="Dairy">Dairy & Breakfast</option>
-                        <option value="Snacks">Munchies & Biscuits</option>
-                        <option value="Drinks">Chilled Drinks</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-bold text-stone-700 mb-1">Product Name *</label>
-                    <input type="text" id="newItemName" placeholder="e.g. Fresh Coconut Water" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-bold text-stone-700 mb-1">Size / Weight *</label>
-                        <input type="text" id="newItemSize" placeholder="e.g. 500 ml / 200 g" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-stone-700 mb-1">Price (₹) *</label>
-                        <input type="number" id="newItemPrice" placeholder="e.g. 40" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-bold text-stone-700 mb-1">Stock Units *</label>
-                    <input type="number" id="newItemStock" value="20" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-                </div>
-                <button onclick="saveItemData()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md mt-2">
-                    Save Product
-                </button>
-            </div>
-        </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openAddItemModal()" class="bg-[#d4a373] hover:bg-[#c39263] text-stone-900 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1 shadow-sm"><i class="fa-solid fa-plus"></i> Add Item</button>
+      <button onclick="goToStoreAsCustomer()" class="bg-stone-800 hover:bg-stone-900 text-white px-3 py-2 rounded-xl text-xs transition flex items-center gap-1 font-semibold" title="Back to Store"><i class="fa-solid fa-store text-[#d4a373]"></i> Store</button>
     </div>
+  </div>
+</header>
 
-    <main class="max-w-md md:max-w-4xl mx-auto px-4 py-4 space-y-4">
-        
-        <!-- MAIN VIEW SWITCHER TABS -->
-        <div class="grid grid-cols-3 gap-1 bg-stone-200/70 p-1.5 rounded-2xl text-xs font-bold text-center">
-            <button onclick="switchAdminView('inventory')" id="btnViewInv" class="bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition">📦 Stock</button>
-            <button onclick="switchAdminView('reports')" id="btnViewRep" class="bg-transparent text-stone-700 py-2 rounded-xl transition">📊 Reports</button>
-            <button onclick="switchAdminView('liveorders')" id="btnViewLive" class="bg-transparent text-stone-700 py-2 rounded-xl transition">⚡ Live Orders</button>
-        </div>
+<div id="assignDeliveryModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
+    <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+      <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-2"><i class="fa-solid fa-motorcycle text-[#d4a373]"></i> Assign Delivery Partner</h3>
+      <button onclick="closeAssignModal()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <input type="hidden" id="assignOrderId">
+    <div class="space-y-3 text-xs">
+      <div><label class="block font-bold text-stone-700 mb-1">Delivery Partner Name *</label>
+        <input type="text" id="riderNameInput" placeholder="e.g. Ramesh Kumar" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      <div><label class="block font-bold text-stone-700 mb-1">Mobile Number *</label>
+        <input type="tel" id="riderPhoneInput" placeholder="e.g. 9876543210" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      <div><label class="block font-bold text-stone-700 mb-1">Email (Optional)</label>
+        <input type="email" id="riderEmailInput" placeholder="rider@zipdash.com" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      <button onclick="saveDeliveryAssignment()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md mt-2">Dispatch & Mark Out for Delivery 🛵</button>
+    </div>
+  </div>
+</div>
 
-        <!-- INVENTORY SECTION -->
-        <div id="inventorySection" class="space-y-4">
-            <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-stone-400 text-xs"></i>
-                <input type="text" id="adminSearchInput" oninput="renderAdminPanel()" placeholder="Search product name..." class="w-full bg-white border border-[#e6e2dd] rounded-xl pl-9 pr-8 py-2.5 text-xs focus:outline-none focus:border-[#1b4332] shadow-sm">
-            </div>
-            <div id="adminInventoryList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-        </div>
+<div id="addItemModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
+    <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+      <h3 id="modalTitle" class="font-extrabold text-sm text-[#1b4332] flex items-center gap-2"><i class="fa-solid fa-circle-plus text-[#d4a373]"></i> Add New Product to Store</h3>
+      <button onclick="closeAddItemModal()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <div class="space-y-3 text-xs">
+      <input type="hidden" id="editItemIndex" value="-1">
+      <div><label class="block font-bold text-stone-700 mb-1">Category *</label>
+        <select id="newItemCategory" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+          <option value="Dairy">Dairy & Breakfast</option><option value="Snacks">Munchies & Biscuits</option><option value="Drinks">Chilled Drinks</option>
+        </select></div>
+      <div><label class="block font-bold text-stone-700 mb-1">Product Name *</label>
+        <input type="text" id="newItemName" placeholder="e.g. Fresh Coconut Water" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="block font-bold text-stone-700 mb-1">Size / Weight *</label>
+          <input type="text" id="newItemSize" placeholder="e.g. 500 ml / 200 g" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+        <div><label class="block font-bold text-stone-700 mb-1">Price (₹) *</label>
+          <input type="number" id="newItemPrice" placeholder="e.g. 40" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      </div>
+      <div><label class="block font-bold text-stone-700 mb-1">Stock Units *</label>
+        <input type="number" id="newItemStock" value="20" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      <div><label class="block font-bold text-stone-700 mb-1">Image URL (Optional)</label>
+        <input type="url" id="newItemImage" placeholder="https://example.com/image.jpg" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
+      <button id="saveItemBtn" onclick="saveItemData()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md mt-2">Save Product</button>
+    </div>
+  </div>
+</div>
 
-        <!-- SALES REPORTS SECTION -->
-        <div id="reportsSection" class="space-y-4 hidden">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]">
-                    <p class="text-[10px] text-stone-400 font-bold uppercase">Total Revenue</p>
-                    <h3 id="reportTotalRevenue" class="text-xl font-extrabold text-[#1b4332] mt-1">₹0</h3>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]">
-                    <p class="text-[10px] text-stone-400 font-bold uppercase">Delivered Orders</p>
-                    <h3 id="reportTotalCount" class="text-xl font-extrabold text-emerald-600 mt-1">0</h3>
-                </div>
-            </div>
-        </div>
+<main class="max-w-md md:max-w-4xl mx-auto px-4 py-4 space-y-4">
+  <div class="grid grid-cols-3 gap-1 bg-stone-200/70 p-1.5 rounded-2xl text-xs font-bold text-center">
+    <button onclick="switchAdminView('inventory')" id="btnViewInv" class="bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition">📦 Stock</button>
+    <button onclick="switchAdminView('reports')" id="btnViewRep" class="bg-transparent text-stone-700 py-2 rounded-xl transition">📊 Reports</button>
+    <button onclick="switchAdminView('liveorders')" id="btnViewLive" class="bg-transparent text-stone-700 py-2 rounded-xl transition">⚡ Live Orders</button>
+  </div>
 
-        <!-- LIVE ORDERS & DELIVERED SECTION -->
-        <div id="liveOrdersSection" class="space-y-4 hidden">
-            <h3 class="font-extrabold text-sm text-[#1b4332] border-b border-[#e6e2dd] pb-2">Incoming Customer Orders</h3>
-            <div id="liveOrdersList" class="space-y-3"></div>
+  <div id="inventorySection" class="space-y-4">
+    <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
+      <button onclick="setFilter('all')" id="tab-all" class="tab-btn bg-[#1b4332] text-white text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm transition">All Items <span id="badge-all">0</span></button>
+      <button onclick="setFilter('instock')" id="tab-instock" class="tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition">In Stock <span id="badge-instock">0</span></button>
+      <button onclick="setFilter('lowstock')" id="tab-lowstock" class="tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition">Low Stock <span id="badge-lowstock">0</span></button>
+      <button onclick="setFilter('outstock')" id="tab-outstock" class="tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition">Out of Stock <span id="badge-outstock">0</span></button>
+    </div>
+    <div class="relative">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-stone-400 text-xs"></i>
+      <input type="text" id="adminSearchInput" oninput="renderAdminPanel()" placeholder="Search product name..." class="w-full bg-white border border-[#e6e2dd] rounded-xl pl-9 pr-8 py-2.5 text-xs focus:outline-none focus:border-[#1b4332] shadow-sm">
+    </div>
+    <div id="adminInventoryList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+  </div>
 
-            <h3 class="font-extrabold text-sm text-emerald-800 border-b border-emerald-200 pb-2 pt-4">Delivered Orders Archive</h3>
-            <div id="deliveredOrdersList" class="space-y-3"></div>
-        </div>
-    </main>
+  <div id="reportsSection" class="space-y-4 hidden">
+    <div class="flex gap-2">
+      <button onclick="setReportPeriod('weekly')" id="btnReportWeekly" class="flex-1 bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition">Weekly (7 Days)</button>
+      <button onclick="setReportPeriod('monthly')" id="btnReportMonthly" class="flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold transition">Monthly (30 Days)</button>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Revenue</p><h3 id="reportTotalRevenue" class="text-xl font-extrabold text-[#1b4332] mt-1">₹0</h3></div>
+      <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Orders</p><h3 id="reportTotalCount" class="text-xl font-extrabold text-emerald-600 mt-1">0</h3></div>
+    </div>
+    <div id="reportsOrdersList" class="space-y-2.5"></div>
+  </div>
 
-    <!-- FIREBASE & ADMIN SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <div id="liveOrdersSection" class="space-y-4 hidden">
+    <h3 class="font-extrabold text-sm text-[#1b4332] border-b border-[#e6e2dd] pb-2">Incoming Customer Orders</h3>
+    <div id="liveOrdersList" class="space-y-3"></div>
+    <h3 class="font-extrabold text-sm text-emerald-800 border-b border-emerald-200 pb-2 pt-4">Delivered Orders Archive</h3>
+    <div id="deliveredOrdersList" class="space-y-3"></div>
+  </div>
+</main>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA0tzieCwONq_78PdvnD4KikuNGM1_heGA",
-            authDomain: "zipdash-f79b4.firebaseapp.com",
-            projectId: "zipdash-f79b4",
-            storageBucket: "zipdash-f79b4.firebasestorage.app",
-            messagingSenderId: "877082429491",
-            appId: "1:877082429491:web:903204df5b0ec1369abb46",
-            measurementId: "G-HJCPPBRVG2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        let liveOrdersList = [];
-        let inventory = [
-            { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, stock: 3 },
-            { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, stock: 45 },
-            { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, stock: 60 },
-            { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, stock: 0 },
-            { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, stock: 12 }
+<script>
+const defaultInventory = [
+            { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, stock: 20, mrp: 35, badge: "DAILY ESSENTIAL" },
+            { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, stock: 20, mrp: 40, badge: "FRESH BATCH" },
+            { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, stock: 20, mrp: 95, badge: "13% OFF" },
+            { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, stock: 20, mrp: 62, badge: "BEST SELLER" },
+            { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, stock: 20, mrp: 30, badge: "CHILLED" },
+            { id: 6, name: "Cold Coffee", category: "Drinks", weight: "180 ml Can", price: 35, stock: 20, mrp: 40, badge: "REFRESHING" },
+            { id: 7, name: "Natural Orange Juice", category: "Drinks", weight: "250 ml Carton", price: 30, stock: 20, mrp: 35, badge: "100% JUICE" },
+            { id: 8, name: "Traditional Aloo Bhujia", category: "Snacks", weight: "150 g Pouch", price: 35, stock: 20, mrp: 40, badge: "CRUNCHY" },
+            { id: 9, name: "Crunchy Atta Biscuits", category: "Snacks", weight: "200 g Pack", price: 40, stock: 20, mrp: 50, badge: "TEA TIME" },
+            { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, stock: 20, mrp: 55, badge: "FAMILY PACK" }
         ];
+let inventory = JSON.parse(localStorage.getItem('zipdash_admin_inventory_v2') || JSON.stringify(defaultInventory));
+let activeFilter = 'all';
+let reportPeriod = 'weekly';
+const orders = () => JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
 
-        window.addEventListener('DOMContentLoaded', () => {
-            // Real-time Firestore listener for orders
-            onSnapshot(collection(db, "orders"), (snapshot) => {
-                liveOrdersList = [];
-                snapshot.forEach((docSnap) => {
-                    liveOrdersList.push({ docId: docSnap.id, ...docSnap.data() });
-                });
-                renderLiveOrders();
-                renderReports();
-            });
-            renderAdminPanel();
-        });
+function goToStoreAsCustomer() {
+  localStorage.removeItem('zipdash_customer_auth');
+  window.location.href = 'index.html';
+}
 
-        window.goToStoreAsCustomer = function() {
-            localStorage.removeItem('zipdash_customer_auth');
-            window.location.href = 'index.html';
-        };
+function switchAdminView(view) {
+  document.getElementById('inventorySection').classList.toggle('hidden', view !== 'inventory');
+  document.getElementById('reportsSection').classList.toggle('hidden', view !== 'reports');
+  document.getElementById('liveOrdersSection').classList.toggle('hidden', view !== 'liveorders');
+  const on = "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition", off = "bg-transparent text-stone-700 py-2 rounded-xl transition";
+  document.getElementById('btnViewInv').className = view === 'inventory' ? on : off;
+  document.getElementById('btnViewRep').className = view === 'reports' ? on : off;
+  document.getElementById('btnViewLive').className = view === 'liveorders' ? on : off;
+  if (view === 'inventory') renderAdminPanel();
+  if (view === 'reports') renderReports();
+  if (view === 'liveorders') renderLiveOrders();
+}
 
-        window.switchAdminView = function(view) {
-            document.getElementById('inventorySection').classList.toggle('hidden', view !== 'inventory');
-            document.getElementById('reportsSection').classList.toggle('hidden', view !== 'reports');
-            document.getElementById('liveOrdersSection').classList.toggle('hidden', view !== 'liveorders');
+function renderLiveOrders() {
+  const allOrders = orders();
+  const liveList = document.getElementById('liveOrdersList');
+  const deliveredList = document.getElementById('deliveredOrdersList');
+  liveList.innerHTML = ''; deliveredList.innerHTML = '';
+  const activeOrders = allOrders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
+  const deliveredOrders = allOrders.filter(o => o.status === 'Delivered');
 
-            document.getElementById('btnViewInv').className = view === 'inventory' ? "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition" : "bg-transparent text-stone-700 py-2 rounded-xl transition";
-            document.getElementById('btnViewRep').className = view === 'reports' ? "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition" : "bg-transparent text-stone-700 py-2 rounded-xl transition";
-            document.getElementById('btnViewLive').className = view === 'liveorders' ? "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition" : "bg-transparent text-stone-700 py-2 rounded-xl transition";
+  if (activeOrders.length === 0) {
+    liveList.innerHTML = `<div class="bg-white border rounded-2xl p-6 text-center text-stone-400 text-xs">No pending orders right now.</div>`;
+  } else {
+    activeOrders.reverse().forEach(ord => {
+      liveList.innerHTML += `
+        <div class="bg-white border rounded-2xl p-4 shadow-sm space-y-2">
+          <div class="flex justify-between items-center border-b pb-2">
+            <span class="font-extrabold text-xs text-[#1b4332]">${ord.id}</span>
+            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">${ord.status}</span>
+          </div>
+          <div class="text-xs space-y-1 text-stone-700">
+            <p><b>Customer:</b> ${ord.customerName} (${ord.customerMobile})</p>
+            <p><b>Items:</b> ${ord.items}</p>
+            <p><b>Address:</b> ${ord.address}</p>
+            <p class="font-extrabold text-[#1b4332]">Total: ₹${ord.total}</p>
+            ${ord.riderName ? `<p class="text-emerald-700 font-bold">🛵 Assigned Rider: ${ord.riderName} (${ord.riderPhone})</p>` : ''}
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button onclick="openAssignModal('${ord.id}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">${ord.riderName ? 'Re-assign Rider' : 'Pending (Assign Rider)'}</button>
+            <button onclick="markOrderDelivered('${ord.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">Mark Delivered ✓</button>
+          </div>
+        </div>`;
+    });
+  }
 
-            if (view === 'inventory') renderAdminPanel();
-            if (view === 'reports') renderReports();
-            if (view === 'liveorders') renderLiveOrders();
-        };
+  if (deliveredOrders.length === 0) {
+    deliveredList.innerHTML = `<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No delivered orders yet.</div>`;
+  } else {
+    deliveredOrders.reverse().forEach(ord => {
+      deliveredList.innerHTML += `
+        <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-3 shadow-sm text-xs space-y-1">
+          <div class="flex justify-between font-bold text-emerald-900"><span>${ord.id} - ${ord.customerName}</span><span>₹${ord.total}</span></div>
+          <p class="text-[10px] text-stone-600">🛒 ${ord.items}</p>
+          <p class="text-[10px] text-emerald-700">🛵 Delivered by: ${ord.riderName || 'Store Team'}</p>
+        </div>`;
+    });
+  }
+}
 
-        function renderLiveOrders() {
-            let liveList = document.getElementById('liveOrdersList');
-            let deliveredList = document.getElementById('deliveredOrdersList');
+function openAssignModal(orderId) {
+  document.getElementById('assignOrderId').value = orderId;
+  ['riderNameInput','riderPhoneInput','riderEmailInput'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('assignDeliveryModal').classList.remove('hidden');
+}
+function closeAssignModal() { document.getElementById('assignDeliveryModal').classList.add('hidden'); }
 
-            liveList.innerHTML = '';
-            deliveredList.innerHTML = '';
+function saveDeliveryAssignment() {
+  const orderId = document.getElementById('assignOrderId').value;
+  const name = document.getElementById('riderNameInput').value.trim();
+  const phone = document.getElementById('riderPhoneInput').value.trim();
+  const email = document.getElementById('riderEmailInput').value.trim();
+  if (!name || !phone) { alert('Please enter Rider Name and Mobile Number.'); return; }
+  const all = orders();
+  const ord = all.find(o => o.id === orderId);
+  if (ord) {
+    ord.riderName = name; ord.riderPhone = phone; ord.riderEmail = email; ord.status = 'Out for Delivery';
+    localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
+    alert(`Successfully assigned ${name} to order ${orderId}!`);
+    closeAssignModal(); renderLiveOrders();
+  }
+}
 
-            let activeOrders = liveOrdersList.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
-            let deliveredOrders = liveOrdersList.filter(o => o.status === 'Delivered');
+function markOrderDelivered(orderId) {
+  const all = orders();
+  const ord = all.find(o => o.id === orderId);
+  if (ord) {
+    ord.status = 'Delivered';
+    localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
+    localStorage.removeItem('zipdash_current_order_id');
+    alert(`Order ${orderId} marked as Delivered and moved to Delivered archive!`);
+    renderLiveOrders();
+  }
+}
 
-            if (activeOrders.length === 0) {
-                liveList.innerHTML = `<div class="bg-white border rounded-2xl p-6 text-center text-stone-400 text-xs">No pending orders right now.</div>`;
-            } else {
-                activeOrders.slice().reverse().forEach(ord => {
-                    liveList.innerHTML += `
-                        <div class="bg-white border rounded-2xl p-4 shadow-sm space-y-2">
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <span class="font-extrabold text-xs text-[#1b4332]">${ord.id}</span>
-                                <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">${ord.status}</span>
-                            </div>
-                            <div class="text-xs space-y-1 text-stone-700">
-                                <p><b>Customer:</b> ${ord.customerName} (${ord.customerMobile})</p>
-                                <p><b>Items:</b> ${ord.items}</p>
-                                <p><b>Address:</b> ${ord.address}</p>
-                                <p class="font-extrabold text-[#1b4332]">Total: ₹${ord.total}</p>
-                                ${ord.riderName ? `<p class="text-emerald-700 font-bold">🛵 Assigned Rider: ${ord.riderName} (${ord.riderPhone})</p>` : ''}
-                            </div>
-                            <div class="flex gap-2 pt-2">
-                                <button onclick="openAssignModal('${ord.docId}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
-                                    ${ord.riderName ? 'Re-assign Rider' : 'Pending (Assign Rider)'}
-                                </button>
-                                <button onclick="markOrderDelivered('${ord.docId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
-                                    Mark Delivered ✓
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
+function resetItemForm() {
+  document.getElementById('editItemIndex').value = '-1';
+  document.getElementById('newItemCategory').value = 'Dairy';
+  ['newItemName','newItemSize','newItemPrice','newItemImage'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('newItemStock').value = '20';
+}
+function openAddItemModal() {
+  resetItemForm();
+  document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-circle-plus text-[#d4a373]"></i> Add New Product to Store';
+  document.getElementById('saveItemBtn').innerText = 'Save Product';
+  document.getElementById('addItemModal').classList.remove('hidden');
+}
+function openEditItemModal(id) {
+  const it = inventory.find(i => i.id === id);
+  if (!it) return;
+  document.getElementById('editItemIndex').value = String(id);
+  document.getElementById('newItemCategory').value = it.category;
+  document.getElementById('newItemName').value = it.name;
+  document.getElementById('newItemSize').value = it.weight || '';
+  document.getElementById('newItemPrice').value = it.price;
+  document.getElementById('newItemStock').value = it.stock;
+  document.getElementById('newItemImage').value = it.image || '';
+  document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-[#d4a373]"></i> Edit Product';
+  document.getElementById('saveItemBtn').innerText = 'Update Product';
+  document.getElementById('addItemModal').classList.remove('hidden');
+}
+function closeAddItemModal() { document.getElementById('addItemModal').classList.add('hidden'); }
 
-            if (deliveredOrders.length === 0) {
-                deliveredOrdersList.innerHTML = `<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No delivered orders yet.</div>`;
-            } else {
-                deliveredOrders.slice().reverse().forEach(ord => {
-                    deliveredList.innerHTML += `
-                        <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-3 shadow-sm text-xs space-y-1">
-                            <div class="flex justify-between font-bold text-emerald-900">
-                                <span>${ord.id} - ${ord.customerName}</span>
-                                <span>₹${ord.total}</span>
-                            </div>
-                            <p class="text-[10px] text-stone-600">🛒 ${ord.items}</p>
-                            <p class="text-[10px] text-emerald-700">🛵 Delivered by: ${ord.riderName || 'Store Team'}</p>
-                        </div>
-                    `;
-                });
-            }
-        }
+function saveItemData() {
+  const name = document.getElementById('newItemName').value.trim();
+  const price = parseFloat(document.getElementById('newItemPrice').value);
+  const stock = parseInt(document.getElementById('newItemStock').value);
+  const weight = document.getElementById('newItemSize').value.trim();
+  const category = document.getElementById('newItemCategory').value;
+  if (!name || isNaN(price) || isNaN(stock)) { alert('Fill mandatory fields.'); return; }
+  const editId = parseInt(document.getElementById('editItemIndex').value);
+  const image = document.getElementById('newItemImage').value.trim();
+  if (editId !== -1) {
+    const it = inventory.find(i => i.id === editId);
+    if (it) Object.assign(it, { name, category, weight, price, stock, image });
+  } else {
+    inventory.push({ id: Date.now(), name, category, weight, price, mrp: price, badge: 'NEW', stock, image });
+  }
+  localStorage.setItem('zipdash_admin_inventory_v2', JSON.stringify(inventory));
+  alert(editId !== -1 ? 'Item updated successfully!' : 'Item added successfully!');
+  closeAddItemModal(); renderAdminPanel();
+}
 
-        window.openAssignModal = function(docId) {
-            document.getElementById('assignDocId').value = docId;
-            document.getElementById('riderNameInput').value = '';
-            document.getElementById('riderPhoneInput').value = '';
-            document.getElementById('riderEmailInput').value = '';
-            document.getElementById('assignDeliveryModal').classList.remove('hidden');
-        };
+const pending = {}; // units waiting to be added/removed (shown between - and +)
+function bumpStock(id, d) {
+  const item = inventory.find(i => i.id === id);
+  if (!item) return;
+  const next = (pending[id] || 0) + d;
+  if (next < 0) return; // counter starts at 0 and never goes negative
+  pending[id] = next;
+  renderAdminPanel();
+}
+function applyStock(id) {
+  const v = pending[id] || 0;
+  pending[id] = 0;
+  if (v !== 0) adjustStock(id, v);
+}
 
-        window.closeAssignModal = function() { document.getElementById('assignDeliveryModal').classList.add('hidden'); };
+function adjustStock(id, amount) {
+  const item = inventory.find(i => i.id === id);
+  if (item) {
+    item.stock = Math.max(0, item.stock + amount);
+    localStorage.setItem('zipdash_admin_inventory_v2', JSON.stringify(inventory));
+    renderAdminPanel();
+  }
+}
 
-        window.saveDeliveryAssignment = async function() {
-            let docId = document.getElementById('assignDocId').value;
-            let name = document.getElementById('riderNameInput').value.trim();
-            let phone = document.getElementById('riderPhoneInput').value.trim();
-            let email = document.getElementById('riderEmailInput').value.trim();
+function setFilter(filter) {
+  activeFilter = filter;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.className = "tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition";
+  });
+  document.getElementById(`tab-${filter}`).className = "tab-btn bg-[#1b4332] text-white text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm transition";
+  renderAdminPanel();
+}
 
-            if (!name || !phone) { alert('Please enter Rider Name and Mobile Number.'); return; }
+function renderAdminPanel() {
+  const list = document.getElementById('adminInventoryList');
+  const search = document.getElementById('adminSearchInput').value.toLowerCase();
+  list.innerHTML = '';
+  document.getElementById('badge-all').innerText = inventory.length;
+  document.getElementById('badge-instock').innerText = inventory.filter(i => i.stock > 5).length;
+  document.getElementById('badge-lowstock').innerText = inventory.filter(i => i.stock > 0 && i.stock <= 5).length;
+  document.getElementById('badge-outstock').innerText = inventory.filter(i => i.stock === 0).length;
 
-            try {
-                await updateDoc(doc(db, "orders", docId), {
-                    riderName: name,
-                    riderPhone: phone,
-                    riderEmail: email,
-                    status: 'Out for Delivery'
-                });
-                alert(`Successfully assigned rider to order!`);
-                closeAssignModal();
-            } catch (e) {
-                console.error("Error assigning rider:", e);
-                alert("Failed to assign rider.");
-            }
-        };
+  const filtered = inventory.filter(item => {
+    if (!item.name.toLowerCase().includes(search)) return false;
+    if (activeFilter === 'instock') return item.stock > 5;
+    if (activeFilter === 'lowstock') return item.stock > 0 && item.stock <= 5;
+    if (activeFilter === 'outstock') return item.stock === 0;
+    return true;
+  });
 
-        window.markOrderDelivered = async function(docId) {
-            try {
-                await updateDoc(doc(db, "orders", docId), { status: 'Delivered' });
-                alert(`Order marked as Delivered!`);
-            } catch (e) {
-                console.error("Error updating status:", e);
-                alert("Failed to update status.");
-            }
-        };
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="col-span-2 bg-white border rounded-2xl p-6 text-center text-stone-400 text-xs">No products found in this filter.</div>`;
+    return;
+  }
 
-        window.openAddItemModal = function() { document.getElementById('addItemModal').classList.remove('hidden'); };
-        window.closeAddItemModal = function() { document.getElementById('addItemModal').classList.add('hidden'); };
-
-        window.saveItemData = function() {
-            let name = document.getElementById('newItemName').value.trim();
-            let price = parseFloat(document.getElementById('newItemPrice').value);
-            let stock = parseInt(document.getElementById('newItemStock').value);
-            let weight = document.getElementById('newItemSize').value.trim();
-            let category = document.getElementById('newItemCategory').value;
-
-            if (!name || isNaN(price) || isNaN(stock)) { alert('Fill mandatory fields.'); return; }
-            inventory.push({ id: inventory.length + 1, name, category, weight, price, stock });
-            alert('Item added successfully!');
-            closeAddItemModal();
-            renderAdminPanel();
-        };
-
-        window.renderAdminPanel = function() {
-            const list = document.getElementById('adminInventoryList');
-            const search = document.getElementById('adminSearchInput').value.toLowerCase();
-            list.innerHTML = '';
+  filtered.forEach(item => {
+    let badgeClass = "bg-emerald-100 text-emerald-800", badgeText = "In Stock";
+    if (item.stock === 0) { badgeClass = "bg-rose-100 text-rose-800"; badgeText = "Out of Stock"; }
+    else if (item.stock <= 5) { badgeClass = "bg-amber-100 text-amber-800"; badgeText = "Low Stock"; }
+    list.innerHTML += `
+      <div class="border bg-white rounded-2xl p-3.5 shadow-sm space-y-2 flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <div class="flex gap-2 items-center">
+            <div>
+              <span class="text-[9px] text-stone-500 uppercase">${item.category} • ₹${item.price} (${item.weight})</span>
+              <h4 class="font-bold text-xs text-stone-800">${item.name}</h4>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="flex flex-wrap gap-2 justify-between items-center pt-2 border-t border-stone-100">
+          <span class="text-xs font-extrabold text-[#1b4332]">Stock: ${item.stock} units</span>
+          <div class="flex items-center gap-1">
+            <button onclick="openEditItemModal(${item.id})" class="bg-[#d4a373]/30 text-[#1b4332] px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#d4a373]/50 transition"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button onclick="bumpStock(${item.id}, -1)" class="bg-rose-50 text-rose-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-rose-100 transition" title="Reduce stock">−</button>
+            <span class="min-w-[2.25rem] text-center text-xs font-extrabold ${(pending[item.id] || 0) > 0 ? 'text-emerald-700' : (pending[item.id] || 0) < 0 ? 'text-rose-700' : 'text-stone-400'}">${(pending[item.id] || 0) > 0 ? '+' + pending[item.id] : (pending[item.id] || 0)}</span>
+            <button onclick="bumpStock(${item.id}, 1)" class="bg-emerald-50 text-emerald-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-emerald-100 transition" title="Add stock">+</button>
+            ${(pending[item.id] || 0) !== 0 ? `<button onclick="applyStock(${item.id})" class="bg-[#1b4332] text-white px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#143225] transition">Apply</button>` : ''}
             
-            inventory.filter(item => item.name.toLowerCase().includes(search)).forEach(item => {
-                list.innerHTML += `
-                    <div class="border bg-white rounded-2xl p-3.5 shadow-sm space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[9px] text-stone-500 uppercase">${item.category} • ₹${item.price}</span>
-                                <h4 class="font-bold text-xs text-stone-800">${item.name}</h4>
-                            </div>
-                            <span class="text-xs font-extrabold text-[#1b4332]">${item.stock} units</span>
-                        </div>
-                    </div>
-                `;
-            });
-        };
+          </div>
+        </div>
+      </div>`;
+  });
+}
 
-        function renderReports() {
-            let totalRev = 0;
-            let deliveredCount = 0;
-            liveOrdersList.forEach(o => {
-                if (o.status === 'Delivered') {
-                    totalRev += Number(o.total || 0);
-                    deliveredCount++;
-                }
-            });
-            document.getElementById('reportTotalRevenue').innerText = `₹${totalRev}`;
-            document.getElementById('reportTotalCount').innerText = deliveredCount;
-        }
-    </script>
+function setReportPeriod(period) {
+  reportPeriod = period;
+  const on = "flex-1 bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition";
+  const off = "flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold transition";
+  document.getElementById('btnReportWeekly').className = period === 'weekly' ? on : off;
+  document.getElementById('btnReportMonthly').className = period === 'monthly' ? on : off;
+  renderReports();
+}
+
+function renderReports() {
+  const allOrders = orders();
+  const now = new Date();
+  const daysLimit = reportPeriod === 'weekly' ? 7 : 30;
+  const filteredOrders = allOrders.filter(o => {
+    if (o.status !== 'Delivered') return false;
+    const orderDate = new Date(o.date || now);
+    return (now - orderDate) / (1000 * 60 * 60 * 24) <= daysLimit;
+  });
+  const totalRev = filteredOrders.reduce((sum, o) => sum + Number(o.total), 0);
+  document.getElementById('reportTotalRevenue').innerText = `₹${totalRev}`;
+  document.getElementById('reportTotalCount').innerText = filteredOrders.length;
+  const repList = document.getElementById('reportsOrdersList');
+  repList.innerHTML = '';
+  if (filteredOrders.length === 0) {
+    repList.innerHTML = `<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No delivered orders for this ${reportPeriod} period.</div>`;
+    return;
+  }
+  filteredOrders.reverse().forEach(ord => {
+    repList.innerHTML += `
+      <div class="bg-white border rounded-xl p-3 text-xs space-y-1 shadow-sm">
+        <div class="flex justify-between font-bold text-[#1b4332]"><span>${ord.id} (${ord.customerName})</span><span>₹${ord.total}</span></div>
+        <p class="text-[10px] text-stone-500">🛒 ${ord.items}</p>
+      </div>`;
+  });
+}
+
+renderAdminPanel();
+</script>
 </body>
 </html>
