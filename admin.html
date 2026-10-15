@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZipDash - Store Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfbf9; color: #2b2b2b; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#fcfbf9] min-h-screen pb-20">
+
+    <!-- ADMIN HEADER -->
+    <header class="bg-[#1b4332] text-white px-4 py-4 sticky top-0 z-30 shadow-md">
+        <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-9 h-9 rounded-xl bg-[#d4a373] flex items-center justify-center text-[#1b4332] font-bold text-lg">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base leading-tight">Store Admin</h1>
+                    <p class="text-[10px] text-emerald-200">Stock & Live Order Management</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openAddItemModal()" class="bg-[#d4a373] hover:bg-[#c39263] text-stone-900 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Add Item
+                </button>
+                <button onclick="goToStoreAsCustomer()" class="bg-stone-800 hover:bg-stone-900 text-white px-3 py-2 rounded-xl text-xs transition flex items-center gap-1 font-semibold" title="Back to Store">
+                    <i class="fa-solid fa-store"></i> Store
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- DELIVERY ASSIGNMENT MODAL -->
+    <div id="assignDeliveryModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
+            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+                <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-2">
+                    <i class="fa-solid fa-motorcycle text-[#d4a373]"></i> Assign Delivery Partner
+                </h3>
+                <button onclick="closeAssignModal()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="hidden" id="assignOrderId">
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Delivery Partner Name *</label>
+                    <input type="text" id="riderNameInput" placeholder="e.g. Ramesh Kumar" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                </div>
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Mobile Number *</label>
+                    <input type="tel" id="riderPhoneInput" placeholder="e.g. 9876543210" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                </div>
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Email (Optional)</label>
+                    <input type="email" id="riderEmailInput" placeholder="rider@zipdash.com" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                </div>
+                <button onclick="saveDeliveryAssignment()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md mt-2">
+                    Dispatch & Mark Out for Delivery 🛵
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT ITEM MODAL -->
+    <div id="addItemModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
+            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+                <h3 id="modalTitle" class="font-extrabold text-sm text-[#1b4332] flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus text-[#d4a373]"></i> Add New Product to Store
+                </h3>
+                <button onclick="closeAddItemModal()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+                <input type="hidden" id="editItemIndex" value="-1">
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Category *</label>
+                    <select id="newItemCategory" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                        <option value="Dairy">Dairy & Breakfast</option>
+                        <option value="Snacks">Munchies & Biscuits</option>
+                        <option value="Drinks">Chilled Drinks</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Product Name *</label>
+                    <input type="text" id="newItemName" placeholder="e.g. Fresh Coconut Water" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-stone-700 mb-1">Size / Weight *</label>
+                        <input type="text" id="newItemSize" placeholder="e.g. 500 ml / 200 g" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-stone-700 mb-1">Price (₹) *</label>
+                        <input type="number" id="newItemPrice" placeholder="e.g. 40" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Stock Units *</label>
+                    <input type="number" id="newItemStock" value="20" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                </div>
+                <div>
+                    <label class="block font-bold text-stone-700 mb-1">Image URL (Optional)</label>
+                    <input type="url" id="newItemImage" placeholder="https://example.com/image.jpg" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+                </div>
+                <button onclick="saveItemData()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md mt-2">
+                    Save Product
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-md md:max-w-4xl mx-auto px-4 py-4 space-y-4">
+        
+        <!-- MAIN VIEW SWITCHER TABS -->
+        <div class="grid grid-cols-3 gap-1 bg-stone-200/70 p-1.5 rounded-2xl text-xs font-bold text-center">
+            <button onclick="switchAdminView('inventory')" id="btnViewInv" class="bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition">📦 Stock</button>
+            <button onclick="switchAdminView('reports')" id="btnViewRep" class="bg-transparent text-stone-700 py-2 rounded-xl transition">📊 Reports</button>
+            <button onclick="switchAdminView('liveorders')" id="btnViewLive" class="bg-transparent text-stone-700 py-2 rounded-xl transition">⚡ Live Orders</button>
+        </div>
+
+        <!-- INVENTORY SECTION -->
+        <div id="inventorySection" class="space-y-4">
+            <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
+                <button onclick="setFilter('all')" id="tab-all" class="tab-btn bg-[#1b4332] text-white text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap shadow-sm transition">All Items <span id="badge-all">0</span></button>
+                <button onclick="setFilter('instock')" id="tab-instock" class="tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition">In Stock <span id="badge-instock">0</span></button>
+                <button onclick="setFilter('lowstock')" id="tab-lowstock" class="tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition">Low Stock <span id="badge-lowstock">0</span></button>
+                <button onclick="setFilter('outstock')" id="tab-outstock" class="tab-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-bold px-3.5 py-2 rounded-xl whitespace-nowrap transition">Out of Stock <span id="badge-outstock">0</span></button>
+            </div>
+
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-stone-400 text-xs"></i>
+                <input type="text" id="adminSearchInput" oninput="renderAdminPanel()" placeholder="Search product name..." class="w-full bg-white border border-[#e6e2dd] rounded-xl pl-9 pr-8 py-2.5 text-xs focus:outline-none focus:border-[#1b4332] shadow-sm">
+            </div>
+
+            <div id="adminInventoryList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+
+        <!-- SALES REPORTS SECTION -->
+        <div id="reportsSection" class="space-y-4 hidden">
+            <div class="flex gap-2">
+                <button onclick="setReportPeriod('weekly')" id="btnReportWeekly" class="flex-1 bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold">Weekly (7 Days)</button>
+                <button onclick="setReportPeriod('monthly')" id="btnReportMonthly" class="flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold">Monthly (30 Days)</button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]">
+                    <p class="text-[10px] text-stone-400 font-bold uppercase">Revenue</p>
+                    <h3 id="reportTotalRevenue" class="text-xl font-extrabold text-[#1b4332] mt-1">₹0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]">
+                    <p class="text-[10px] text-stone-400 font-bold uppercase">Orders</p>
+                    <h3 id="reportTotalCount" class="text-xl font-extrabold text-emerald-600 mt-1">0</h3>
+                </div>
+            </div>
+            <div id="reportsOrdersList" class="space-y-2.5"></div>
+        </div>
+
+        <!-- LIVE ORDERS & DELIVERED SECTION -->
+        <div id="liveOrdersSection" class="space-y-4 hidden">
+            <h3 class="font-extrabold text-sm text-[#1b4332] border-b border-[#e6e2dd] pb-2">Incoming Customer Orders</h3>
+            <div id="liveOrdersList" class="space-y-3"></div>
+
+            <h3 class="font-extrabold text-sm text-emerald-800 border-b border-emerald-200 pb-2 pt-4">Delivered Orders Archive</h3>
+            <div id="deliveredOrdersList" class="space-y-3"></div>
+        </div>
+    </main>
+
+    <script>
+        let inventory = [
+            { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, stock: 3, image: "" },
+            { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, stock: 45, image: "" },
+            { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, stock: 60, image: "" },
+            { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, stock: 0, image: "" },
+            { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, stock: 12, image: "" }
+        ];
+
+        let activeFilter = 'all';
+        let reportPeriod = 'weekly';
+
+        function goToStoreAsCustomer() {
+            localStorage.removeItem('zipdash_customer_auth');
+            window.location.href = 'final.html';
+        }
+
+        function switchAdminView(view) {
+            document.getElementById('inventorySection').classList.toggle('hidden', view !== 'inventory');
+            document.getElementById('reportsSection').classList.toggle('hidden', view !== 'reports');
+            document.getElementById('liveOrdersSection').classList.toggle('hidden', view !== 'liveorders');
+
+            document.getElementById('btnViewInv').className = view === 'inventory' ? "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition" : "bg-transparent text-stone-700 py-2 rounded-xl transition";
+            document.getElementById('btnViewRep').className = view === 'reports' ? "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition" : "bg-transparent text-stone-700 py-2 rounded-xl transition";
+            document.getElementById('btnViewLive').className = view === 'liveorders' ? "bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition" : "bg-transparent text-stone-700 py-2 rounded-xl transition";
+
+            if (view === 'inventory') renderAdminPanel();
+            if (view === 'reports') renderReports();
+            if (view === 'liveorders') renderLiveOrders();
+        }
+
+        function renderLiveOrders() {
+            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+            let liveList = document.getElementById('liveOrdersList');
+            let deliveredList = document.getElementById('deliveredOrdersList');
+
+            liveList.innerHTML = '';
+            deliveredList.innerHTML = '';
+
+            let activeOrders = allOrders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
+            let deliveredOrders = allOrders.filter(o => o.status === 'Delivered');
+
+            if (activeOrders.length === 0) {
+                liveList.innerHTML = `<div class="bg-white border rounded-2xl p-6 text-center text-stone-400 text-xs">No pending orders right now.</div>`;
+            } else {
+                activeOrders.reverse().forEach(ord => {
+                    liveList.innerHTML += `
+                        <div class="bg-white border rounded-2xl p-4 shadow-sm space-y-2">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <span class="font-extrabold text-xs text-[#1b4332]">${ord.id}</span>
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">${ord.status}</span>
+                            </div>
+                            <div class="text-xs space-y-1 text-stone-700">
+                                <p><b>Customer:</b> ${ord.customerName} (${ord.customerMobile})</p>
+                                <p><b>Items:</b> ${ord.items}</p>
+                                <p><b>Address:</b> ${ord.address}</p>
+                                <p class="font-extrabold text-[#1b4332]">Total: ₹${ord.total}</p>
+                                ${ord.riderName ? `<p class="text-emerald-700 font-bold">🛵 Assigned Rider: ${ord.riderName} (${ord.riderPhone})</p>` : ''}
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button onclick="openAssignModal('${ord.id}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
+                                    ${ord.riderName ? 'Re-assign Rider' : 'Pending (Assign Rider)'}
+                                </button>
+                                <button onclick="markOrderDelivered('${ord.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
+                                    Mark Delivered ✓
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (deliveredOrders.length === 0) {
+                deliveredOrdersList.innerHTML = `<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No delivered orders yet.</div>`;
+            } else {
+                deliveredOrders.reverse().forEach(ord => {
+                    deliveredList.innerHTML += `
+                        <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-3 shadow-sm text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-emerald-900">
+                                <span>${ord.id} - ${ord.customerName}</span>
+                                <span>₹${ord.total}</span>
+                            </div>
+                            <p class="text-[10px] text-stone-600">🛒 ${ord.items}</p>
+                            <p class="text-[10px] text-emerald-700">🛵 Delivered by: ${ord.riderName || 'Store Team'}</p>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function openAssignModal(orderId) {
+            document.getElementById('assignOrderId').value = orderId;
+            document.getElementById('riderNameInput').value = '';
+            document.getElementById('riderPhoneInput').value = '';
+            document.getElementById('riderEmailInput').value = '';
+            document.getElementById('assignDeliveryModal').classList.remove('hidden');
+        }
+
+        function closeAssignModal() { document.getElementById('assignDeliveryModal').classList.add('hidden'); }
+
+        function saveDeliveryAssignment() {
+            let orderId = document.getElementById('assignOrderId').value;
+            let name = document.getElementById('riderNameInput').value.trim();
+            let phone = document.getElementById('riderPhoneInput').value.trim();
+            let email = document.getElementById('riderEmailInput').value.trim();
+
+            if (!name || !phone) { alert('Please enter Rider Name and Mobile Number.'); return; }
+
+            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+            let ord = allOrders.find(o => o.id === orderId);
+            if (ord) {
+                ord.riderName = name;
+                ord.riderPhone = phone;
+                ord.riderEmail = email;
+                ord.status = 'Out for Delivery';
+                localStorage.setItem('zipdash_all_orders', JSON.stringify(allOrders));
+                alert(`Successfully assigned ${name} to order ${orderId}!`);
+                closeAssignModal();
+                renderLiveOrders();
+            }
+        }
+
+        function markOrderDelivered(orderId) {
+            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+            let ord = allOrders.find(o => o.id === orderId);
+            if (ord) {
+                ord.status = 'Delivered';
+                localStorage.setItem('zipdash_all_orders', JSON.stringify(allOrders));
+                localStorage.removeItem('zipdash_current_order_id');
+                alert(`Order ${orderId} marked as Delivered and moved to Delivered archive!`);
+                renderLiveOrders();
+            }
+        }
+
+        function openAddItemModal() { document.getElementById('addItemModal').classList.remove('hidden'); }
+        function closeAddItemModal() { document.getElementById('addItemModal').classList.add('hidden'); }
+
+        function saveItemData() {
+            let name = document.getElementById('newItemName').value.trim();
+            let price = parseFloat(document.getElementById('newItemPrice').value);
+            let stock = parseInt(document.getElementById('newItemStock').value);
+            let weight = document.getElementById('newItemSize').value.trim();
+            let category = document.getElementById('newItemCategory').value;
+
+            if (!name || isNaN(price) || isNaN(stock)) { alert('Fill mandatory fields.'); return; }
+            inventory.push({ id: inventory.length + 1, name, category, weight, price, stock, image: '' });
+            alert('Item added!');
+            closeAddItemModal();
+            renderAdminPanel();
+        }
+
+        function setFilter(filter) { activeFilter = filter; renderAdminPanel(); }
+        function renderAdminPanel() {
+            const list = document.getElementById('adminInventoryList');
+            list.innerHTML = '';
+            inventory.forEach((item, index) => {
+                list.innerHTML += `
+                    <div class="border bg-white rounded-2xl p-3.5 shadow-sm space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] text-stone-500 uppercase">${item.category} • ₹${item.price}</span>
+                                <h4 class="font-bold text-xs text-stone-800">${item.name}</h4>
+                            </div>
+                            <span class="text-xs font-extrabold text-[#1b4332]">${item.stock} units</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderReports() {
+            let allOrders = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+            let totalRev = 0;
+            allOrders.forEach(o => { if (o.status === 'Delivered') totalRev += o.total; });
+            document.getElementById('reportTotalRevenue').innerText = `₹${totalRev}`;
+            document.getElementById('reportTotalCount').innerText = allOrders.filter(o => o.status === 'Delivered').length;
+        }
+
+        renderAdminPanel();
+    </script>
+</body>
+</html>
