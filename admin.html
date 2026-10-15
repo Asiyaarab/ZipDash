@@ -82,6 +82,12 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 </div>
 
 <main class="max-w-md md:max-w-4xl mx-auto px-4 py-4 space-y-4">
+  <!-- SUCCESS NOTIFICATION TOAST BANNER -->
+  <div id="adminToastBanner" class="bg-emerald-600 text-white text-xs py-2.5 px-4 text-center font-bold shadow-md hidden transition-all duration-300 rounded-xl flex items-center justify-center gap-2">
+    <i class="fa-solid fa-circle-check text-white text-sm"></i>
+    <span id="adminToastText">Success message here</span>
+  </div>
+
   <div class="grid grid-cols-3 gap-1 bg-stone-200/70 p-1.5 rounded-2xl text-xs font-bold text-center">
     <button onclick="switchAdminView('inventory')" id="btnViewInv" class="bg-[#1b4332] text-white py-2 rounded-xl shadow-sm transition">📦 Stock</button>
     <button onclick="switchAdminView('reports')" id="btnViewRep" class="bg-transparent text-stone-700 py-2 rounded-xl transition">📊 Reports</button>
@@ -139,6 +145,16 @@ let inventory = JSON.parse(localStorage.getItem('zipdash_admin_inventory_v2') ||
 let activeFilter = 'all';
 let reportPeriod = 'weekly';
 const orders = () => JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+
+function showAdminToast(message) {
+  const toast = document.getElementById('adminToastBanner');
+  const toastText = document.getElementById('adminToastText');
+  toastText.innerText = message;
+  toast.classList.remove('hidden');
+  setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 3000);
+}
 
 function goToStoreAsCustomer() {
   localStorage.removeItem('zipdash_customer_auth');
@@ -223,7 +239,7 @@ function saveDeliveryAssignment() {
   if (ord) {
     ord.riderName = name; ord.riderPhone = phone; ord.riderEmail = email; ord.status = 'Out for Delivery';
     localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
-    alert(`Successfully assigned ${name} to order ${orderId}!`);
+    showAdminToast(`Successfully assigned ${name} to order ${orderId}!`);
     closeAssignModal(); renderLiveOrders();
   }
 }
@@ -235,7 +251,7 @@ function markOrderDelivered(orderId) {
     ord.status = 'Delivered';
     localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
     localStorage.removeItem('zipdash_current_order_id');
-    alert(`Order ${orderId} marked as Delivered and moved to Delivered archive!`);
+    showAdminToast(`Order ${orderId} marked as Delivered!`);
     renderLiveOrders();
   }
 }
@@ -280,11 +296,12 @@ function saveItemData() {
   if (editId !== -1) {
     const it = inventory.find(i => i.id === editId);
     if (it) Object.assign(it, { name, category, weight, price, stock, image });
+    showAdminToast(`✨ ${name} edited successfully!`);
   } else {
     inventory.push({ id: Date.now(), name, category, weight, price, mrp: price, badge: 'NEW', stock, image });
+    showAdminToast(`🎉 ${name} added successfully!`);
   }
   localStorage.setItem('zipdash_admin_inventory_v2', JSON.stringify(inventory));
-  alert(editId !== -1 ? 'Item updated successfully!' : 'Item added successfully!');
   closeAddItemModal(); renderAdminPanel();
 }
 
