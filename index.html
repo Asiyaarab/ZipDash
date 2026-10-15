@@ -262,18 +262,21 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 
 <script>
 const ADMIN_EMAIL = "aashiyaarab39@gmail.com";
-const products = [
-  { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, mrp: 35, badge: "DAILY ESSENTIAL" },
-  { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, mrp: 40, badge: "FRESH BATCH" },
-  { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, mrp: 95, badge: "13% OFF" },
-  { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, mrp: 62, badge: "BEST SELLER" },
-  { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, mrp: 30, badge: "CHILLED" },
-  { id: 6, name: "Cold Coffee", category: "Drinks", weight: "180 ml Can", price: 35, mrp: 40, badge: "REFRESHING" },
-  { id: 7, name: "Natural Orange Juice", category: "Drinks", weight: "250 ml Carton", price: 30, mrp: 35, badge: "100% JUICE" },
-  { id: 8, name: "Traditional Aloo Bhujia", category: "Snacks", weight: "150 g Pouch", price: 35, mrp: 40, badge: "CRUNCHY" },
-  { id: 9, name: "Crunchy Atta Biscuits", category: "Snacks", weight: "200 g Pack", price: 40, mrp: 50, badge: "TEA TIME" },
-  { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, mrp: 55, badge: "FAMILY PACK" }
+const defaultInventory = [
+    { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, mrp: 35, badge: "DAILY ESSENTIAL", stock: 20 },
+    { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, mrp: 40, badge: "FRESH BATCH", stock: 20 },
+    { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, mrp: 95, badge: "13% OFF", stock: 20 },
+    { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, mrp: 62, badge: "BEST SELLER", stock: 20 },
+    { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, mrp: 30, badge: "CHILLED", stock: 20 },
+    { id: 6, name: "Cold Coffee", category: "Drinks", weight: "180 ml Can", price: 35, mrp: 40, badge: "REFRESHING", stock: 20 },
+    { id: 7, name: "Natural Orange Juice", category: "Drinks", weight: "250 ml Carton", price: 30, mrp: 35, badge: "100% JUICE", stock: 20 },
+    { id: 8, name: "Traditional Aloo Bhujia", category: "Snacks", weight: "150 g Pouch", price: 35, mrp: 40, badge: "CRUNCHY", stock: 20 },
+    { id: 9, name: "Crunchy Atta Biscuits", category: "Snacks", weight: "200 g Pack", price: 40, mrp: 50, badge: "TEA TIME", stock: 20 },
+    { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, mrp: 55, badge: "FAMILY PACK", stock: 20 }
 ];
+
+// Admin panel wali same key yahan bhi use hogi
+let products = JSON.parse(localStorage.getItem('zipdash_admin_inventory_v2') || JSON.stringify(defaultInventory));
 const availableOffers = [
   { code: "WELCOME10", discount: "₹10 OFF", minOrder: 99, desc: "Valid on orders above ₹99." },
   { code: "FRESH20", discount: "20% OFF", minOrder: 149, desc: "Valid on orders above ₹149." },
