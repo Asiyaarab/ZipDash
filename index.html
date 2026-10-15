@@ -695,8 +695,12 @@ function cancelActiveOrder() {
     cart = {}; updateCartUI(); renderProducts();
     
     closeLiveTracking();
-    checkActiveOrderStatus();
     
+    // Hide active order banner and header track button immediately
+    document.getElementById('activeOrderBanner').classList.add('hidden');
+    document.getElementById('trackBtnHeader').classList.add('hidden');
+    
+    // Show cancellation banner correctly
     const cancelBanner = document.getElementById('cancelledOrderBanner');
     cancelBanner.classList.remove('hidden');
     setTimeout(() => {
