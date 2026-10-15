@@ -1,847 +1,697 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZipDash - 15 Min Neighborhood Delivery</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfbf9; color: #2b2b2b; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes bounce-slow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-bounce-slow { animation: bounce-slow 2s infinite ease-in-out; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ZipDash - 15 Min Neighborhood Delivery</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: #fcfbf9; color: #2b2b2b; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+@keyframes bounce-slow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.animate-bounce-slow { animation: bounce-slow 2s infinite ease-in-out; }
+@keyframes rideFast {
+  0% { transform: translateX(-120vw) scale(1); opacity: 0; }
+  20% { opacity: 1; }
+  80% { transform: translateX(15vw) scale(1.3); }
+  100% { transform: translateX(120vw) scale(1.2); opacity: 0; }
+}
+.rider-animation { animation: rideFast 3s cubic-bezier(0.15,0.85,0.35,1) forwards; }
+</style>
 </head>
 <body class="bg-[#fcfbf9] min-h-screen flex flex-col selection:bg-[#1b4332] selection:text-white pb-24">
 
-    <!-- CUSTOMER LOGIN GATEWAY MODAL -->
-    <div id="customerLoginModal" class="fixed inset-0 bg-stone-900/90 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl p-6 max-w-xs w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
-            <div class="text-center space-y-1">
-                <div class="w-12 h-12 bg-[#1b4332] text-[#d4a373] rounded-xl flex items-center justify-center mx-auto text-xl font-bold">
-                    <i class="fa-solid fa-user-circle"></i>
-                </div>
-                <h3 class="font-extrabold text-base text-[#1b4332]">Welcome to ZipDash</h3>
-                <p class="text-[11px] text-stone-500">Enter your email ID to continue.</p>
-            </div>
-            <div class="space-y-3 text-xs pt-2">
-                <input type="email" id="custLoginInput" placeholder="Enter your email ID..." class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]">
-                <button onclick="handleSmartLogin()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md">
-                    Continue
-                </button>
-            </div>
-        </div>
+<div id="magicalSplash" class="fixed inset-0 bg-[#1b4332] z-50 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-1000">
+  <div class="relative w-full flex flex-col items-center justify-center space-y-4">
+    <div class="w-24 h-24 rounded-3xl bg-[#d4a373] text-[#1b4332] flex items-center justify-center text-5xl font-black shadow-2xl animate-pulse"><i class="fa-solid fa-bolt"></i></div>
+    <h1 class="text-white text-3xl font-black tracking-wider uppercase">ZipDash</h1>
+    <p class="text-emerald-200 text-xs font-semibold tracking-widest uppercase">Lightning Fast 15 Min Delivery</p>
+    <div class="absolute top-24 rider-animation text-[#d4a373] text-8xl drop-shadow-2xl"><i class="fa-solid fa-motorcycle"></i></div>
+  </div>
+  <div class="absolute bottom-12 text-stone-300 text-xs tracking-widest uppercase animate-pulse font-bold">Zooming to your street... ⚡</div>
+</div>
+
+<div id="voiceModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl border border-[#e6e2dd]">
+    <div class="w-16 h-16 bg-emerald-100 text-[#1b4332] rounded-full flex items-center justify-center mx-auto text-2xl animate-bounce"><i class="fa-solid fa-microphone"></i></div>
+    <div><h3 class="font-extrabold text-base text-[#1b4332]">Listening...</h3><p id="voiceTranscript" class="text-xs text-stone-500 mt-1">Speak now (e.g., "Milk" or "Paneer")</p></div>
+    <button onclick="closeVoiceModal()" class="w-full bg-stone-100 text-stone-700 py-2.5 rounded-xl font-bold text-xs hover:bg-stone-200 transition">Cancel</button>
+  </div>
+</div>
+
+<div id="customerLoginModal" class="fixed inset-0 bg-stone-900/90 z-40 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl p-6 max-w-xs w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
+    <div class="text-center space-y-1">
+      <div class="w-12 h-12 bg-[#1b4332] text-[#d4a373] rounded-xl flex items-center justify-center mx-auto text-xl font-bold"><i class="fa-solid fa-user-circle"></i></div>
+      <h3 class="font-extrabold text-base text-[#1b4332]">Welcome to ZipDash</h3>
+      <p class="text-[11px] text-stone-500">Enter your email ID to continue.</p>
     </div>
-
-    <!-- MAGIC HEART BOX POPUP MODAL -->
-    <div id="heartBoxModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl border-2 border-[#1b4332]">
-            <div class="w-20 h-20 bg-[#1b4332] text-[#d4a373] rounded-2xl flex items-center justify-center mx-auto text-3xl shadow-lg animate-bounce-slow">
-                <i class="fa-solid fa-heart text-rose-500"></i>
-            </div>
-            <div>
-                <span class="bg-emerald-100 text-emerald-900 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">Order Placed Successfully! 🎉</span>
-                <h3 class="font-extrabold text-base text-[#1b4332] mt-2">A Special Box Opened For You!</h3>
-            </div>
-            <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 shadow-inner">
-                <p id="uniqueQuoteText" class="text-xs font-bold text-stone-900 leading-relaxed"></p>
-                <p class="text-[10px] text-emerald-800 font-semibold mt-2">⚡ Redirecting to live tracking in <span id="countdownTimer">5</span>s...</p>
-            </div>
-            <button onclick="closeHeartBoxAndTrack()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold text-xs hover:bg-[#143225] transition shadow-md flex items-center justify-center gap-2">
-                <span>View Live Order Tracking Now ⚡</span>
-            </button>
-        </div>
+    <div class="space-y-3 text-xs pt-2">
+      <input type="email" id="custLoginInput" placeholder="Enter your email ID..." class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]">
+      <button onclick="handleSmartLogin()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md">Continue</button>
     </div>
+  </div>
+</div>
 
-    <!-- TOP HEADER -->
-    <header class="sticky top-0 z-40 bg-[#fcfbf9]/90 backdrop-blur-md border-b border-[#e6e2dd] px-4 py-3">
-        <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <div class="w-9 h-9 rounded-xl bg-[#1b4332] flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    <i class="fa-solid fa-bolt text-[#d4a373]"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg text-[#1b4332] leading-tight">ZipDash</h1>
-                    <p class="text-xs text-stone-500 flex items-center gap-1 font-medium">
-                        <i class="fa-solid fa-location-dot text-[#d4a373]"></i> Residential Zone (15 mins)
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="openLiveTracking()" id="trackBtnHeader" class="bg-emerald-100 text-[#1b4332] text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm hidden animate-pulse">
-                    <i class="fa-solid fa-motorcycle"></i> Live Track
-                </button>
-                <button onclick="toggleCart()" class="relative bg-white border border-[#e6e2dd] p-2.5 rounded-xl shadow-sm text-[#1b4332] hover:bg-stone-50 transition">
-                    <i class="fa-solid fa-bag-shopping text-lg"></i>
-                    <span id="cartBadge" class="absolute -top-1.5 -right-1.5 bg-[#d4a373] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- ACTIVE ORDER LIVE TRACKING BANNER -->
-    <div id="activeOrderBanner" class="bg-[#1b4332] text-white px-4 py-3 shadow-inner hidden">
-        <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#d4a373] text-[#1b4332] rounded-xl flex items-center justify-center text-lg font-bold animate-bounce">
-                    <i class="fa-solid fa-box-open"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] text-emerald-200 uppercase tracking-wider font-bold">Live Quick Delivery</p>
-                    <h4 id="bannerStatusText" class="text-xs font-extrabold">Order Placed - Arriving in 15 mins</h4>
-                </div>
-            </div>
-            <button onclick="openLiveTracking()" class="bg-white text-[#1b4332] text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm hover:bg-stone-100 transition">
-                Track Live ⚡
-            </button>
-        </div>
+<div id="offersModal" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto border border-[#e6e2dd]">
+    <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+      <h3 class="font-extrabold text-sm text-[#1b4332] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-tags text-[#d4a373]"></i> Available Offers & Coupons</h3>
+      <button onclick="closeOffersModal()" class="text-stone-400 hover:text-stone-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
     </div>
+    <div id="offersListContainer" class="space-y-3"></div>
+  </div>
+</div>
 
-    <!-- PERSISTENT FREE DELIVERY BANNER -->
-    <div class="bg-[#1b4332] text-white text-xs py-2 px-4 text-center font-bold shadow-inner flex items-center justify-center gap-2 border-b border-[#143225]">
-        <i class="fa-solid fa-gift text-[#d4a373]"></i>
-        <span>Unlock FREE Delivery on orders above ₹100!</span>
+<div id="heartBoxModal" class="fixed inset-0 bg-black/80 z-40 hidden flex items-center justify-center p-4 backdrop-blur-md">
+  <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl border-2 border-[#1b4332]">
+    <div class="w-20 h-20 bg-[#1b4332] text-[#d4a373] rounded-2xl flex items-center justify-center mx-auto text-3xl shadow-lg animate-bounce-slow"><i class="fa-solid fa-heart text-rose-500"></i></div>
+    <div>
+      <span class="bg-emerald-100 text-emerald-900 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">Order Placed Successfully! 🎉</span>
+      <h3 class="font-extrabold text-base text-[#1b4332] mt-2">A Special Box Opened For You!</h3>
     </div>
-
-    <!-- MAIN CONTENT -->
-    <main class="max-w-md md:max-w-4xl mx-auto px-4 py-4 flex-grow w-full">
-
-        <!-- SEARCH BAR -->
-        <div class="relative mb-4">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-stone-400"></i>
-            <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Search milk, paneer, drinks, biscuits..." class="w-full bg-white border border-[#e6e2dd] rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#1b4332] shadow-sm">
-        </div>
-
-        <!-- HERO PROMO BANNER -->
-        <div class="bg-gradient-to-r from-[#1b4332] to-[#2d6a4f] rounded-2xl p-5 text-white mb-5 shadow-md relative overflow-hidden">
-            <div class="relative z-10">
-                <span class="bg-[#d4a373] text-stone-900 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Hyper-Local Fast Delivery</span>
-                <h2 class="text-xl font-extrabold mt-2 leading-snug">Fresh Dairy & Snacks at Your Doorstep</h2>
-                <p class="text-xs text-stone-200 mt-1 opacity-90">Lightning-fast delivery straight inside your street in 15 minutes.</p>
-            </div>
-            <div class="absolute -right-4 -bottom-6 text-white/10 text-7xl font-black">⚡</div>
-        </div>
-
-        <!-- CATEGORIES -->
-        <div class="flex space-x-2 overflow-x-auto hide-scrollbar mb-4 pb-1">
-            <button onclick="filterCategory('all')" id="cat-all" class="cat-btn bg-[#1b4332] text-white text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">All Items</button>
-            <button onclick="filterCategory('Dairy')" id="cat-Dairy" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Dairy & Breakfast</button>
-            <button onclick="filterCategory('Snacks')" id="cat-Snacks" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Munchies & Biscuits</button>
-            <button onclick="filterCategory('Drinks')" id="cat-Drinks" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Chilled Drinks</button>
-        </div>
-
-        <!-- TRENDING ESSENTIALS SECTION TITLE -->
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-1.5">
-                <span>🔥 Trending Essentials in Your Area</span>
-            </h3>
-            <span id="productCountLabel" class="text-xs text-stone-500 font-medium">10 items</span>
-        </div>
-
-        <!-- PRODUCTS GRID -->
-        <div id="productGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5"></div>
-    </main>
-
-    <!-- LIVE TRACKING MODAL WITH ORDER DETAILS -->
-    <div id="liveTrackingModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-5 max-w-lg w-full space-y-4 shadow-2xl border border-[#e6e2dd] max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
-                    <h3 class="font-extrabold text-sm text-[#1b4332]">Live Order Tracking & Partner Details</h3>
-                </div>
-                <button onclick="closeLiveTracking()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <!-- ORDER SUMMARY CARD INSIDE LIVE TRACKER -->
-            <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-2 text-xs">
-                <div class="flex justify-between font-extrabold text-[#1b4332]">
-                    <span id="modalOrderIdText">Order ID: #---</span>
-                    <span id="modalOrderStatusText" class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">Status: Pending</span>
-                </div>
-                <div class="text-stone-700 border-t border-emerald-100/60 pt-2">
-                    <p class="font-bold text-[11px] text-stone-900 mb-0.5">🛒 Ordered Items:</p>
-                    <p id="modalOrderItemsText" class="text-stone-600 text-[11px]">Loading items...</p>
-                </div>
-                <div class="flex justify-between text-stone-700 border-t border-emerald-100/60 pt-2 font-bold">
-                    <span>Delivery Address:</span>
-                    <span id="modalOrderAddressText" class="text-right text-stone-600 font-medium truncate max-w-[200px]">---</span>
-                </div>
-                <div class="flex justify-between text-[#1b4332] font-extrabold pt-1 border-t border-emerald-100/60">
-                    <span>Total Amount Paid:</span>
-                    <span id="modalOrderTotalText">₹0</span>
-                </div>
-            </div>
-
-            <div class="w-full h-32 rounded-2xl overflow-hidden border border-[#e6e2dd] shadow-inner relative">
-                <iframe id="liveMapFrame" width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q=Mumbai&t=&z=14&ie=UTF8&iwloc=&output=embed" class="w-full h-full"></iframe>
-                <div class="absolute bottom-2 left-2 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-[#1b4332] shadow">
-                    📍 Area-wise GPS Tracking Active
-                </div>
-            </div>
-
-            <div id="riderInfoCard" class="bg-stone-50 border border-[#e6e2dd] rounded-2xl p-3.5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 bg-[#1b4332] text-[#d4a373] rounded-2xl flex items-center justify-center text-lg font-bold shadow">
-                        <i class="fa-solid fa-motorcycle"></i>
-                    </div>
-                    <div>
-                        <span id="riderStatusBadge" class="text-[9px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded">Delivery partner will be assigned</span>
-                        <h4 id="riderNameText" class="font-bold text-xs text-stone-800 mt-1">Waiting for assignment...</h4>
-                        <p id="riderPhoneText" class="text-[10px] text-stone-500">📞 Store team is reviewing order</p>
-                    </div>
-                </div>
-                <a id="riderCallBtn" href="#" class="bg-emerald-600 hover:bg-emerald-700 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow transition hidden" title="Call Partner">
-                    <i class="fa-solid fa-phone text-xs"></i>
-                </a>
-            </div>
-
-            <div class="bg-stone-50 border border-[#e6e2dd] rounded-2xl p-3 space-y-2">
-                <p class="text-[10px] font-bold text-stone-500 uppercase flex items-center gap-1">
-                    <i class="fa-solid fa-comments text-[#1b4332]"></i> Chat with Delivery Partner
-                </p>
-                <div id="chatMessagesBox" class="bg-white border border-[#e6e2dd] rounded-xl p-2.5 h-16 overflow-y-auto space-y-1.5 text-xs text-stone-700">
-                    <div class="bg-emerald-50 text-[#1b4332] p-2 rounded-xl text-[11px] w-fit max-w-[85%] font-medium">
-                        👋 Hello! Your order is being processed. Once assigned, your rider will message here.
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="Type message..." class="flex-grow bg-white border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
-                    <button onclick="sendChatMessage()" class="bg-[#1b4332] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#143225] transition">Send</button>
-                </div>
-            </div>
-
-            <!-- Cancel Order Button (Will hide automatically once rider is assigned) -->
-            <button id="cancelOrderBtn" onclick="cancelActiveOrder()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 rounded-xl font-bold text-xs transition border border-rose-200 flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-ban"></i> Cancel Order
-            </button>
-        </div>
+    <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 shadow-inner">
+      <p id="uniqueQuoteText" class="text-xs font-bold text-stone-900 leading-relaxed"></p>
+      <p class="text-[10px] text-emerald-800 font-semibold mt-2">⚡ Redirecting to live tracking in <span id="countdownTimer">5</span>s...</p>
     </div>
+    <button onclick="closeHeartBoxAndTrack()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold text-xs hover:bg-[#143225] transition shadow-md flex items-center justify-center gap-2"><span>View Live Order Tracking Now ⚡</span></button>
+  </div>
+</div>
 
-    <!-- BOTTOM NAVIGATION FOOTER -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e6e2dd] py-2.5 px-8 z-40 max-w-md md:max-w-4xl mx-auto shadow-lg">
-        <div class="flex justify-around items-center text-stone-600">
-            <a href="index.html" class="flex flex-col items-center gap-1 text-[#1b4332] font-bold text-[10px] transition">
-                <i class="fa-solid fa-house text-base"></i>
-                <span>Home</span>
-            </a>
-            <a href="#offers" onclick="alert('Use code WELCOME10 in cart for ₹10 off!'); return false;" class="flex flex-col items-center gap-1 hover:text-[#1b4332] text-stone-400 font-medium text-[10px] transition">
-                <i class="fa-solid fa-tags text-base"></i>
-                <span>Offers</span>
-            </a>
-            <a href="#" onclick="toggleCart(); return false;" class="flex flex-col items-center gap-1 hover:text-[#1b4332] text-stone-400 font-medium text-[10px] relative transition">
-                <div class="relative">
-                    <i class="fa-solid fa-cart-shopping text-base"></i>
-                    <span id="cartFooterBadge" class="absolute -top-1.5 -right-2 bg-rose-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
-                </div>
-                <span>Cart</span>
-            </a>
-            <a href="#" onclick="openUserProfile(); return false;" class="flex flex-col items-center gap-1 hover:text-[#1b4332] text-stone-400 font-medium text-[10px] transition">
-                <i class="fa-solid fa-user text-base"></i>
-                <span>Account</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- PROFILE MODAL -->
-    <div id="profileModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-3 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-                <h3 class="font-extrabold text-sm text-[#1b4332] uppercase tracking-wider">Account Center</h3>
-                <button onclick="closeUserProfile()" class="text-stone-400 hover:text-stone-600 text-base"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div class="py-2 border-b border-stone-100">
-                <h4 id="profileGreetingName" class="font-extrabold text-sm text-stone-900 uppercase">HEY, USER</h4>
-                <p id="profileUserEmail" class="text-xs text-stone-500 font-medium mt-0.5">email@gmail.com</p>
-            </div>
-
-            <div class="divide-y divide-stone-100 text-xs font-bold text-stone-800">
-                <div onclick="toggleProfileSection('orders')" class="py-3.5 flex justify-between items-center cursor-pointer hover:text-[#1b4332] transition">
-                    <span>Order History</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-stone-400"></i>
-                </div>
-                <div id="profileOrdersList" class="hidden py-3 bg-stone-50 rounded-xl px-3 space-y-2 max-h-40 overflow-y-auto"></div>
-
-                <div onclick="toggleProfileSection('wishlist')" class="py-3.5 flex justify-between items-center cursor-pointer hover:text-[#1b4332] transition">
-                    <span>My Wishlist</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-stone-400"></i>
-                </div>
-                <div id="profileWishlistList" class="hidden py-3 bg-stone-50 rounded-xl px-3 space-y-2 max-h-40 overflow-y-auto"></div>
-
-                <div onclick="logoutCustomer()" class="py-3.5 flex justify-between items-center cursor-pointer text-rose-600 hover:text-rose-700 transition">
-                    <span>Sign Out</span>
-                    <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
-                </div>
-            </div>
-        </div>
+<header class="sticky top-0 z-30 bg-[#fcfbf9]/90 backdrop-blur-md border-b border-[#e6e2dd] px-4 py-3">
+  <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <div class="w-9 h-9 rounded-xl bg-[#1b4332] flex items-center justify-center text-white font-bold text-lg shadow-sm"><i class="fa-solid fa-bolt text-[#d4a373]"></i></div>
+      <div>
+        <h1 class="font-extrabold text-lg text-[#1b4332] leading-tight">ZipDash</h1>
+        <p class="text-xs text-stone-500 flex items-center gap-1 font-medium"><i class="fa-solid fa-location-dot text-[#d4a373]"></i> Residential Zone (15 mins)</p>
+      </div>
     </div>
-
-    <!-- CART MODAL -->
-    <div id="cartModal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-end transition-opacity">
-        <div class="bg-[#fcfbf9] w-full max-w-md md:max-w-lg h-full flex flex-col shadow-2xl transform transition-transform">
-            <div class="p-4 border-b border-[#e6e2dd] flex items-center justify-between bg-white">
-                <h3 class="font-bold text-base text-[#1b4332] flex items-center gap-2">
-                    <i class="fa-solid fa-bag-shopping text-[#d4a373]"></i> Your Shopping Basket
-                </h3>
-                <button onclick="toggleCart()" class="text-stone-400 hover:text-stone-700 text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div id="cartDeliveryNotice" class="bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center"></div>
-            <div id="cartItemsList" class="p-4 flex-grow overflow-y-auto space-y-3"></div>
-
-            <div class="p-4 bg-white border-t border-[#e6e2dd] space-y-3">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="custNameInput" placeholder="Your Full Name *" class="bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
-                    <input type="tel" id="custMobileInput" placeholder="Mobile Number *" class="bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
-                </div>
-
-                <div class="space-y-1">
-                    <label class="block font-bold text-stone-700 text-xs">Payment Method *</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="flex items-center gap-2 bg-stone-50 border border-[#e6e2dd] p-2 rounded-xl cursor-pointer text-xs font-semibold">
-                            <input type="radio" name="paymentMode" value="COD" checked class="accent-[#1b4332]"> Cash on Delivery
-                        </label>
-                        <label class="flex items-center gap-2 bg-stone-50 border border-[#e6e2dd] p-2 rounded-xl cursor-pointer text-xs font-semibold">
-                            <input type="radio" name="paymentMode" value="Online" class="accent-[#1b4332]"> Pay Online (GPay/UPI)
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex gap-2">
-                    <input type="text" id="promoInput" placeholder="Promo code (WELCOME10)" class="flex-grow bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs uppercase focus:outline-none focus:border-[#1b4332]">
-                    <button onclick="applyPromo()" class="bg-stone-200 text-[#1b4332] font-semibold px-4 py-2 rounded-xl text-xs hover:bg-stone-300 transition">Apply</button>
-                </div>
-                <div>
-                    <input type="text" id="deliveryAddress" placeholder="Building Name, Room No, Street Landmark..." class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
-                </div>
-                <div class="text-xs space-y-1.5 pt-1 text-stone-600">
-                    <div class="flex justify-between"><span>Subtotal</span><span id="subtotalAmount">₹0</span></div>
-                    <div class="flex justify-between"><span>Delivery Fee</span><span id="deliveryFeeDisplay">₹20</span></div>
-                    <div id="discountRow" class="flex justify-between text-emerald-600 hidden"><span>Discount</span><span id="discountAmount">-₹0</span></div>
-                    <div class="flex justify-between font-bold text-sm text-[#1b4332] pt-2 border-t border-stone-100">
-                        <span>Total Payable</span><span id="totalPayable">₹0</span>
-                    </div>
-                </div>
-                <button onclick="placeOrderAction()" class="w-full bg-[#1b4332] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#143225] transition shadow-md flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check-circle text-lg"></i> Place Order & Pay
-                </button>
-            </div>
-        </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openLiveTracking()" id="trackBtnHeader" class="bg-emerald-100 text-[#1b4332] text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm hidden animate-pulse"><i class="fa-solid fa-motorcycle"></i> Live Track</button>
+      <button onclick="toggleCart()" class="relative bg-[#1b4332] border border-[#143225] p-2.5 rounded-xl shadow-sm text-[#d4a373] hover:bg-[#143225] transition">
+        <i class="fa-solid fa-bag-shopping text-lg"></i>
+        <span id="cartBadge" class="absolute -top-1.5 -right-1.5 bg-[#d4a373] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+      </button>
     </div>
+  </div>
+</header>
 
-    <!-- FIREBASE & APP SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<div id="activeOrderBanner" class="bg-[#1b4332] text-white px-4 py-3 shadow-inner hidden">
+  <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-[#d4a373] text-[#1b4332] rounded-xl flex items-center justify-center text-lg font-bold animate-bounce"><i class="fa-solid fa-box-open"></i></div>
+      <div>
+        <p class="text-[10px] text-emerald-200 uppercase tracking-wider font-bold">Live Quick Delivery</p>
+        <h4 id="bannerStatusText" class="text-xs font-extrabold">Order Placed - Arriving in 15 mins</h4>
+      </div>
+    </div>
+    <button onclick="openLiveTracking()" class="bg-white text-[#1b4332] text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm hover:bg-stone-100 transition">Track Live ⚡</button>
+  </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA0tzieCwONq_78PdvnD4KikuNGM1_heGA",
-            authDomain: "zipdash-f79b4.firebaseapp.com",
-            projectId: "zipdash-f79b4",
-            storageBucket: "zipdash-f79b4.firebasestorage.app",
-            messagingSenderId: "877082429491",
-            appId: "1:877082429491:web:903204df5b0ec1369abb46",
-            measurementId: "G-HJCPPBRVG2"
-        };
+<div class="bg-[#1b4332] text-white text-xs py-2 px-4 text-center font-bold shadow-inner flex items-center justify-center gap-2 border-b border-[#143225]">
+  <i class="fa-solid fa-gift text-[#d4a373]"></i><span>Unlock FREE Delivery on orders above ₹100!</span>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<main class="max-w-md md:max-w-4xl mx-auto px-4 py-4 flex-grow w-full">
+  <div class="relative mb-4 flex items-center">
+    <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-stone-400"></i>
+    <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Search milk, paneer, drinks, biscuits..." class="w-full bg-white border border-[#e6e2dd] rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:border-[#1b4332] shadow-sm">
+    <button onclick="startVoiceOrder()" class="absolute right-3.5 text-stone-500 hover:text-[#1b4332] text-base p-1 transition" title="Voice Search"><i class="fa-solid fa-microphone"></i></button>
+  </div>
+  <div class="bg-gradient-to-r from-[#1b4332] to-[#2d6a4f] rounded-2xl p-5 text-white mb-5 shadow-md relative overflow-hidden">
+    <div class="relative z-10">
+      <span class="bg-[#d4a373] text-stone-900 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Hyper-Local Fast Delivery</span>
+      <h2 class="text-xl font-extrabold mt-2 leading-snug">Fresh Dairy & Snacks at Your Doorstep</h2>
+      <p class="text-xs text-stone-200 mt-1 opacity-90">Lightning-fast delivery straight inside your street in 15 minutes.</p>
+    </div>
+    <div class="absolute -right-4 -bottom-6 text-white/10 text-7xl font-black">⚡</div>
+  </div>
+  <div class="flex space-x-2 overflow-x-auto hide-scrollbar mb-4 pb-1">
+    <button onclick="filterCategory('all')" id="cat-all" class="cat-btn bg-[#1b4332] text-white text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">All Items</button>
+    <button onclick="filterCategory('Dairy')" id="cat-Dairy" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Dairy & Breakfast</button>
+    <button onclick="filterCategory('Snacks')" id="cat-Snacks" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Munchies & Biscuits</button>
+    <button onclick="filterCategory('Drinks')" id="cat-Drinks" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Chilled Drinks</button>
+  </div>
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-1.5"><span>🔥 Trending Essentials in Your Area</span></h3>
+    <span id="productCountLabel" class="text-xs text-stone-500 font-medium">10 items</span>
+  </div>
+  <div id="productGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3.5"></div>
+</main>
 
-        const ADMIN_EMAIL = "aashiyaarab39@gmail.com";
+<div id="liveTrackingModal" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl p-5 max-w-lg w-full space-y-4 shadow-2xl border border-[#e6e2dd] max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span><h3 class="font-extrabold text-sm text-[#1b4332]">Live Order Tracking & Partner Details</h3></div>
+      <button onclick="closeLiveTracking()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-2 text-xs">
+      <div class="flex justify-between font-extrabold text-[#1b4332]"><span id="modalOrderIdText">Order ID: #---</span><span id="modalOrderStatusText" class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">Status: Pending</span></div>
+      <div class="text-stone-700 border-t border-emerald-100/60 pt-2"><p class="font-bold text-[11px] text-stone-900 mb-0.5">🛒 Ordered Items:</p><p id="modalOrderItemsText" class="text-stone-600 text-[11px]">Loading items...</p></div>
+      <div class="flex justify-between text-stone-700 border-t border-emerald-100/60 pt-2 font-bold"><span>Delivery Address:</span><span id="modalOrderAddressText" class="text-right text-stone-600 font-medium truncate max-w-[200px]">---</span></div>
+      <div class="flex justify-between text-[#1b4332] font-extrabold pt-1 border-t border-emerald-100/60"><span>Total Amount Paid:</span><span id="modalOrderTotalText">₹0</span></div>
+    </div>
+    <div class="w-full h-32 rounded-2xl overflow-hidden border border-[#e6e2dd] shadow-inner relative bg-emerald-50">
+      <iframe id="liveMapFrame" width="100%" height="100%" frameborder="0" scrolling="no" src="https://maps.google.com/maps?q=Mumbai&t=&z=14&ie=UTF8&iwloc=&output=embed" class="w-full h-full"></iframe>
+      <div class="absolute bottom-2 left-2 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-[#1b4332] shadow">📍 Area-wise GPS Tracking Active</div>
+    </div>
+    <div id="riderInfoCard" class="bg-stone-50 border border-[#e6e2dd] rounded-2xl p-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 bg-[#1b4332] text-[#d4a373] rounded-2xl flex items-center justify-center text-lg font-bold shadow"><i class="fa-solid fa-motorcycle"></i></div>
+        <div>
+          <span id="riderStatusBadge" class="text-[9px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded">Delivery partner will be assigned</span>
+          <h4 id="riderNameText" class="font-bold text-xs text-stone-800 mt-1">Waiting for assignment...</h4>
+          <p id="riderPhoneText" class="text-[10px] text-stone-500">📞 Store team is reviewing order</p>
+        </div>
+      </div>
+      <a id="riderCallBtn" href="#" class="bg-emerald-600 hover:bg-emerald-700 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow transition hidden" title="Call Partner"><i class="fa-solid fa-phone text-xs"></i></a>
+    </div>
+    <div class="bg-stone-50 border border-[#e6e2dd] rounded-2xl p-3 space-y-2">
+      <p class="text-[10px] font-bold text-stone-500 uppercase flex items-center gap-1"><i class="fa-solid fa-comments text-[#1b4332]"></i> Chat with Delivery Partner</p>
+      <div id="chatMessagesBox" class="bg-white border border-[#e6e2dd] rounded-xl p-2.5 h-16 overflow-y-auto space-y-1.5 text-xs text-stone-700">
+        <div class="bg-emerald-50 text-[#1b4332] p-2 rounded-xl text-[11px] w-fit max-w-[85%] font-medium">👋 Hello! Your order is being processed. Once assigned, your rider will message here.</div>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="chatInput" placeholder="Type message..." class="flex-grow bg-white border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
+        <button onclick="sendChatMessage()" class="bg-[#1b4332] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#143225] transition">Send</button>
+      </div>
+    </div>
+    <button id="cancelOrderBtn" onclick="cancelActiveOrder()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 rounded-xl font-bold text-xs transition border border-rose-200 flex items-center justify-center gap-1.5"><i class="fa-solid fa-ban"></i> Cancel Order</button>
+  </div>
+</div>
 
-        const products = [
-            { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, mrp: 35, badge: "DAILY ESSENTIAL" },
-            { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, mrp: 40, badge: "FRESH BATCH" },
-            { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, mrp: 95, badge: "13% OFF" },
-            { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, mrp: 62, badge: "BEST SELLER" },
-            { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, mrp: 30, badge: "CHILLED" },
-            { id: 6, name: "Cold Coffee", category: "Drinks", weight: "180 ml Can", price: 35, mrp: 40, badge: "REFRESHING" },
-            { id: 7, name: "Natural Orange Juice", category: "Drinks", weight: "250 ml Carton", price: 30, mrp: 35, badge: "100% JUICE" },
-            { id: 8, name: "Traditional Aloo Bhujia", category: "Snacks", weight: "150 g Pouch", price: 35, mrp: 40, badge: "CRUNCHY" },
-            { id: 9, name: "Crunchy Atta Biscuits", category: "Snacks", weight: "200 g Pack", price: 40, mrp: 50, badge: "TEA TIME" },
-            { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, mrp: 55, badge: "FAMILY PACK" }
-        ];
+<nav class="fixed bottom-0 left-0 right-0 bg-[#1b4332] border-t border-[#143225] py-2.5 px-8 z-30 max-w-md md:max-w-4xl mx-auto shadow-2xl">
+  <div class="flex justify-around items-center text-emerald-100">
+    <a href="final.html" class="flex flex-col items-center gap-1 text-[#d4a373] font-extrabold uppercase tracking-wider text-[10px] transition"><i class="fa-solid fa-house text-base"></i><span>Home</span></a>
+    <a href="#offers" onclick="openOffersModal(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] hover:opacity-80 font-extrabold uppercase tracking-wider text-[10px] transition"><i class="fa-solid fa-tags text-base"></i><span>Offers</span></a>
+    <a href="cart.html" onclick="toggleCart(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] hover:opacity-80 font-extrabold uppercase tracking-wider text-[10px] relative transition">
+      <div class="relative"><i class="fa-solid fa-cart-shopping text-base"></i><span id="cartFooterBadge" class="absolute -top-1.5 -right-2 bg-[#d4a373] text-[#1b4332] text-[9px] font-black w-4 h-4 ring-2 ring-[#1b4332] rounded-full flex items-center justify-center">0</span></div><span>Cart</span>
+    </a>
+    <a href="#" onclick="openUserProfile(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] hover:opacity-80 font-extrabold uppercase tracking-wider text-[10px] transition"><i class="fa-solid fa-user text-base"></i><span>Account</span></a>
+  </div>
+</nav>
 
-        let cart = {};
-        let wishlist = JSON.parse(localStorage.getItem('zipdash_wishlist') || '[]');
-        let activeCategory = 'all';
-        let appliedDiscount = 0;
-        let heartTimer = null;
-        let liveOrdersList = [];
+<div id="profileModal" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-3 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+      <h3 class="font-extrabold text-sm text-[#1b4332] uppercase tracking-wider">Account Center</h3>
+      <button onclick="closeUserProfile()" class="text-stone-400 hover:text-stone-600 text-base"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="py-2 border-b border-stone-100">
+      <h4 id="profileGreetingName" class="font-extrabold text-sm text-stone-900 uppercase">HEY, USER</h4>
+      <p id="profileUserEmail" class="text-xs text-stone-500 font-medium mt-0.5">email@gmail.com</p>
+    </div>
+    <div class="divide-y divide-stone-100 text-xs font-bold text-stone-800">
+      <div onclick="toggleProfileSection('orders')" class="py-3.5 flex justify-between items-center cursor-pointer hover:text-[#1b4332] transition"><span>Order History</span><i class="fa-solid fa-chevron-right text-[10px] text-stone-400"></i></div>
+      <div id="profileOrdersList" class="hidden py-3 bg-stone-50 rounded-xl px-3 space-y-2 max-h-40 overflow-y-auto"></div>
+      <div onclick="toggleProfileSection('wishlist')" class="py-3.5 flex justify-between items-center cursor-pointer hover:text-[#1b4332] transition"><span>My Wishlist</span><i class="fa-solid fa-chevron-right text-[10px] text-stone-400"></i></div>
+      <div id="profileWishlistList" class="hidden py-3 bg-stone-50 rounded-xl px-3 space-y-2 max-h-40 overflow-y-auto"></div>
+      <div onclick="logoutCustomer()" class="py-3.5 flex justify-between items-center cursor-pointer text-rose-600 hover:text-rose-700 transition"><span>Sign Out</span><i class="fa-solid fa-right-from-bracket text-[10px]"></i></div>
+    </div>
+  </div>
+</div>
 
-        const uniqueQuotes = [
-            "❤️ \"Your order just made our day brighter! Freshness is on its way to your doorstep.\"",
-            "✨ \"Good things come to those who order fast. Thank you for choosing ZipDash!\"",
-            "💖 \"A little box of happiness is packed and ready for dispatch. Enjoy your fresh essentials!\"",
-            "🌟 \"Speed, smile, and freshness delivered right into your hands with love.\"",
-            "💝 \"Your trust is our favorite recipe. Fast 15-minute delivery incoming!\""
-        ];
+<div id="cartModal" class="fixed inset-0 bg-black/50 z-40 hidden flex justify-end transition-opacity">
+  <div class="bg-[#fcfbf9] w-full max-w-md md:max-w-lg h-full flex flex-col shadow-2xl">
+    <div class="p-4 border-b border-[#e6e2dd] flex items-center justify-between bg-[#1b4332] text-white">
+      <h3 class="font-extrabold text-base flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-[#d4a373]"></i> Your Shopping Basket</h3>
+      <button onclick="toggleCart()" class="text-emerald-200 hover:text-white text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="cartDeliveryNotice" class="bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center"></div>
+    <div id="cartItemsList" class="p-4 overflow-y-auto space-y-3 max-h-[35vh]"></div>
+    <div class="px-4 py-2.5 bg-emerald-50 border-t border-b border-emerald-200">
+      <h4 class="font-extrabold text-xs text-[#1b4332] mb-2 flex items-center gap-1.5"><i class="fa-solid fa-bolt text-[#d4a373]"></i> Frequently Bought Together (Suggested)</h4>
+      <div id="cartSuggestionsList" class="flex gap-2 overflow-x-auto hide-scrollbar pb-1"></div>
+    </div>
+    <div class="p-4 bg-white border-t border-[#e6e2dd] space-y-3 overflow-y-auto">
+      <div class="grid grid-cols-2 gap-2">
+        <input type="text" id="custNameInput" placeholder="Your Full Name *" class="bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
+        <input type="tel" id="custMobileInput" placeholder="Mobile Number *" class="bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
+      </div>
+      <div class="space-y-1">
+        <label class="block font-bold text-stone-700 text-xs">Payment Method *</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center gap-2 bg-stone-50 border border-[#e6e2dd] p-2 rounded-xl cursor-pointer text-xs font-semibold"><input type="radio" name="paymentMode" value="COD" checked class="accent-[#1b4332]"> Cash on Delivery</label>
+          <label class="flex items-center gap-2 bg-stone-50 border border-[#e6e2dd] p-2 rounded-xl cursor-pointer text-xs font-semibold"><input type="radio" name="paymentMode" value="Online" class="accent-[#1b4332]"> Pay Online (GPay/UPI)</label>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="promoInput" placeholder="Promo code (e.g., WELCOME10)" class="flex-grow bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs uppercase focus:outline-none focus:border-[#1b4332]">
+        <button onclick="applyPromo()" class="bg-[#d4a373] text-[#1b4332] font-bold px-4 py-2 rounded-xl text-xs hover:bg-[#c29265] transition">Apply</button>
+      </div>
+      <input type="text" id="deliveryAddress" placeholder="Building Name, Room No, Street Landmark..." class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
+      <div class="text-xs space-y-1.5 pt-1 text-stone-600">
+        <div class="flex justify-between"><span>Subtotal</span><span id="subtotalAmount">₹0</span></div>
+        <div class="flex justify-between"><span>Delivery Fee</span><span id="deliveryFeeDisplay">₹20</span></div>
+        <div id="discountRow" class="flex justify-between text-emerald-600 hidden"><span>Discount</span><span id="discountAmount">-₹0</span></div>
+        <div class="flex justify-between font-bold text-sm text-[#1b4332] pt-2 border-t border-stone-100"><span>Total Payable</span><span id="totalPayable">₹0</span></div>
+      </div>
+      <button onclick="placeOrderAction()" class="w-full bg-[#1b4332] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#143225] transition shadow-md flex items-center justify-center gap-2"><i class="fa-solid fa-check-circle text-lg text-[#d4a373]"></i> Place Order & Pay</button>
+    </div>
+  </div>
+</div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('zipdash_customer_auth');
-            if (!savedUser) {
-                document.getElementById('customerLoginModal').classList.remove('hidden');
-            }
-            renderProducts();
-            updateCartUI();
+<script>
+const ADMIN_EMAIL = "aashiyaarab39@gmail.com";
+const products = [
+  { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, mrp: 35, badge: "DAILY ESSENTIAL" },
+  { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, mrp: 40, badge: "FRESH BATCH" },
+  { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, mrp: 95, badge: "13% OFF" },
+  { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, mrp: 62, badge: "BEST SELLER" },
+  { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, mrp: 30, badge: "CHILLED" },
+  { id: 6, name: "Cold Coffee", category: "Drinks", weight: "180 ml Can", price: 35, mrp: 40, badge: "REFRESHING" },
+  { id: 7, name: "Natural Orange Juice", category: "Drinks", weight: "250 ml Carton", price: 30, mrp: 35, badge: "100% JUICE" },
+  { id: 8, name: "Traditional Aloo Bhujia", category: "Snacks", weight: "150 g Pouch", price: 35, mrp: 40, badge: "CRUNCHY" },
+  { id: 9, name: "Crunchy Atta Biscuits", category: "Snacks", weight: "200 g Pack", price: 40, mrp: 50, badge: "TEA TIME" },
+  { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, mrp: 55, badge: "FAMILY PACK" }
+];
+const availableOffers = [
+  { code: "WELCOME10", discount: "₹10 OFF", minOrder: 99, desc: "Valid on orders above ₹99." },
+  { code: "FRESH20", discount: "20% OFF", minOrder: 149, desc: "Valid on orders above ₹149." },
+  { code: "QUICK50", discount: "₹50 OFF", minOrder: 299, desc: "Valid on orders above ₹299." },
+  { code: "SNACK15", discount: "₹15 OFF", minOrder: 75, desc: "Valid on orders above ₹75." },
+  { code: "ZIPSUPER", discount: "₹30 OFF", minOrder: 199, desc: "Valid on orders above ₹199." }
+];
 
-            // Real-time listener from Firestore database
-            onSnapshot(collection(db, "orders"), (snapshot) => {
-                liveOrdersList = [];
-                snapshot.forEach((docSnap) => {
-                    liveOrdersList.push({ docId: docSnap.id, ...docSnap.data() });
-                });
-                checkActiveOrderStatus();
-            });
-        });
 
-        window.handleSmartLogin = function() {
-            const emailInput = document.getElementById('custLoginInput').value.trim().toLowerCase();
-            if (!emailInput || !emailInput.includes('@')) {
-                alert('Please enter a valid email address.');
-                return;
-            }
+let cart = {};
+let wishlist = JSON.parse(localStorage.getItem('zipdash_wishlist') || '[]');
+let activeCategory = 'all';
+let appliedDiscount = 0;
+let heartTimer = null;
 
-            if (emailInput === ADMIN_EMAIL) {
-                alert('Admin email recognized! Redirecting to Admin Panel...');
-                window.location.href = 'admin.html'; 
-            } else {
-                localStorage.setItem('zipdash_customer_auth', emailInput);
-                document.getElementById('customerLoginModal').classList.add('hidden');
-            }
-        };
+const uniqueQuotes = [
+  "❤️ \"Your order just made our day brighter! Freshness is on its way to your doorstep.\"",
+  "✨ \"Good things come to those who order fast. Thank you for choosing ZipDash!\"",
+  "💖 \"A little box of happiness is packed and ready for dispatch. Enjoy your fresh essentials!\"",
+  "🌟 \"Speed, smile, and freshness delivered right into your hands with love.\"",
+  "💝 \"Your trust is our favorite recipe. Fast 15-minute delivery incoming!\"",
+  "🚀 \"Blazing fast delivery activated! Your neighborhood store is on the move.\"",
+  "🌷 \"Freshness guaranteed from our local shelves straight to your kitchen counter.\"",
+  "⭐ \"Every order tells a story of speed and care. Thanks for shopping with us!\"",
+  "📦 \"Packed securely, delivered swiftly. Enjoy the ultimate quick commerce experience!\"",
+  "🎉 \"High-fives all around! Your neighborhood order is out for lightning-fast delivery.\""
+];
 
-        function checkActiveOrderStatus() {
-            let activeOrderId = localStorage.getItem('zipdash_current_order_id');
-            let currentOrder = liveOrdersList.find(o => o.id === activeOrderId);
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('magicalSplash');
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 1000);
+  }, 3000);
+  if (!localStorage.getItem('zipdash_customer_auth')) document.getElementById('customerLoginModal').classList.remove('hidden');
+  renderProducts(); updateCartUI(); checkActiveOrderStatus();
+  setInterval(checkActiveOrderStatus, 3000);
+});
 
-            if (!currentOrder || currentOrder.status === 'Delivered' || currentOrder.status === 'Cancelled') {
-                if (activeOrderId) {
-                    localStorage.removeItem('zipdash_current_order_id');
-                }
-                document.getElementById('activeOrderBanner').classList.add('hidden');
-                document.getElementById('trackBtnHeader').classList.add('hidden');
-                return;
-            }
+function startVoiceOrder() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("Voice recognition is not supported on this browser. Try using Chrome on Android."); return; }
+  const rec = new SR();
+  rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+  document.getElementById('voiceModal').classList.remove('hidden');
+  document.getElementById('voiceTranscript').innerText = "Listening... Speak now";
+  try { rec.start(); } catch(e) { closeVoiceModal(); return; }
+  rec.onresult = e => {
+    const t = e.results[0][0].transcript;
+    document.getElementById('voiceTranscript').innerText = `You said: "${t}"`;
+    document.getElementById('searchInput').value = t;
+    filterProducts();
+    setTimeout(closeVoiceModal, 1000);
+  };
+  rec.onerror = () => {
+    document.getElementById('voiceTranscript').innerText = "Could not hear clearly. Try again.";
+    setTimeout(closeVoiceModal, 1500);
+  };
+  rec.onspeechend = () => rec.stop();
+}
+function closeVoiceModal(){ document.getElementById('voiceModal').classList.add('hidden'); }
 
-            document.getElementById('activeOrderBanner').classList.remove('hidden');
-            document.getElementById('trackBtnHeader').classList.remove('hidden');
+function cartSubtotal(){ let s=0; Object.values(cart).forEach(i=>s+=i.price*i.qty); return s; }
 
-            document.getElementById('modalOrderIdText').innerText = `Order ID: ${currentOrder.id}`;
-            document.getElementById('modalOrderStatusText').innerText = `Status: ${currentOrder.status}`;
-            document.getElementById('modalOrderItemsText').innerText = currentOrder.items;
-            document.getElementById('modalOrderAddressText').innerText = currentOrder.address;
-            document.getElementById('modalOrderTotalText').innerText = `₹${currentOrder.total}`;
+function openOffersModal() {
+  const subtotal = cartSubtotal();
+  const c = document.getElementById('offersListContainer'); c.innerHTML = '';
+  availableOffers.forEach(o => {
+    const ok = subtotal >= o.minOrder;
+    c.innerHTML += `
+      <div class="bg-emerald-50/50 border ${ok?'border-emerald-300':'border-stone-200'} rounded-2xl p-4 flex items-center justify-between shadow-sm">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="bg-emerald-100 text-[#1b4332] text-[10px] font-extrabold px-2.5 py-0.5 rounded">${o.discount}</span>
+            <span class="text-[10px] font-bold ${ok?'text-emerald-700':'text-amber-700'}">${ok?'✅ Eligible':`🔒 Min spend ₹${o.minOrder}`}</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-stone-900 mt-1">${o.code}</h4>
+          <p class="text-xs text-stone-600 mt-0.5">${o.desc}</p>
+        </div>
+        <button onclick="copyOfferCode('${o.code}', ${o.minOrder})" class="bg-[#1b4332] text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-[#143225] transition shadow-sm whitespace-nowrap">Copy</button>
+      </div>`;
+  });
+  document.getElementById('offersModal').classList.remove('hidden');
+}
+function closeOffersModal(){ document.getElementById('offersModal').classList.add('hidden'); }
+function copyOfferCode(code, minOrder) {
+  const subtotal = cartSubtotal();
+  if (subtotal < minOrder) alert(`Note: Code "${code}" requires a minimum order of ₹${minOrder}. Your current cart subtotal is ₹${subtotal}. Add more items to use it!`);
+  else { try { navigator.clipboard.writeText(code); } catch(e){} alert(`Coupon code "${code}" copied! Paste it in your cart promo box.`); }
+  closeOffersModal();
+}
 
-            if (currentOrder.riderName && currentOrder.riderName.trim() !== "") {
-                document.getElementById('riderStatusBadge').innerText = "Delivery partner assigned 🛵";
-                document.getElementById('riderStatusBadge').className = "text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded";
-                document.getElementById('riderNameText').innerText = `${currentOrder.riderName} (Rider)`;
-                document.getElementById('riderPhoneText').innerText = `📞 ${currentOrder.riderPhone || 'N/A'}`;
-                document.getElementById('riderCallBtn').href = `tel:${currentOrder.riderPhone}`;
-                document.getElementById('riderCallBtn').classList.remove('hidden');
-                document.getElementById('cancelOrderBtn').classList.add('hidden');
-            } else {
-                document.getElementById('riderStatusBadge').innerText = "Delivery partner will be assigned ⏳";
-                document.getElementById('riderStatusBadge').className = "text-[9px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded";
-                document.getElementById('riderNameText').innerText = "Waiting for assignment...";
-                document.getElementById('riderPhoneText').innerText = "📞 Store team is reviewing order";
-                document.getElementById('riderCallBtn').classList.add('hidden');
-                document.getElementById('cancelOrderBtn').classList.remove('hidden');
-            }
-        }
+function handleSmartLogin() {
+  const email = document.getElementById('custLoginInput').value.trim().toLowerCase();
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  if (email === ADMIN_EMAIL) {
+    alert('Admin email recognized! Redirecting to Admin Panel...');
+    window.location.href = 'admin.html';
+    return;
+  }
+  localStorage.setItem('zipdash_customer_auth', email);
+  document.getElementById('customerLoginModal').classList.add('hidden');
+}
 
-        window.toggleWishlist = function(id) {
-            const index = wishlist.indexOf(id);
-            if (index > -1) {
-                wishlist.splice(index, 1);
-            } else {
-                wishlist.push(id);
-            }
-            localStorage.setItem('zipdash_wishlist', JSON.stringify(wishlist));
-            renderProducts();
-            if (!document.getElementById('profileModal').classList.contains('hidden')) {
-                window.openUserProfile();
-            }
-        };
+function checkActiveOrderStatus() {
+  const id = localStorage.getItem('zipdash_current_order_id');
+  const all = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+  const cur = all.find(o => o.id === id);
+  if (!cur || cur.status === 'Delivered' || cur.status === 'Cancelled') {
+    if (id) localStorage.removeItem('zipdash_current_order_id');
+    document.getElementById('activeOrderBanner').classList.add('hidden');
+    document.getElementById('trackBtnHeader').classList.add('hidden');
+    return;
+  }
+  document.getElementById('activeOrderBanner').classList.remove('hidden');
+  document.getElementById('trackBtnHeader').classList.remove('hidden');
+  document.getElementById('modalOrderIdText').innerText = `Order ID: ${cur.id}`;
+  document.getElementById('modalOrderStatusText').innerText = `Status: ${cur.status}`;
+  document.getElementById('modalOrderItemsText').innerText = cur.items;
+  document.getElementById('modalOrderAddressText').innerText = cur.address;
+  document.getElementById('modalOrderTotalText').innerText = `₹${cur.total}`;
+  if (cur.riderName && cur.riderName.trim() !== "") {
+    document.getElementById('riderStatusBadge').innerText = "Delivery partner assigned 🛵";
+    document.getElementById('riderStatusBadge').className = "text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded";
+    document.getElementById('riderNameText').innerText = `${cur.riderName} (Rider)`;
+    document.getElementById('riderPhoneText').innerText = `📞 ${cur.riderPhone || 'N/A'}`;
+    document.getElementById('riderCallBtn').href = `tel:${cur.riderPhone}`;
+    document.getElementById('riderCallBtn').classList.remove('hidden');
+    document.getElementById('cancelOrderBtn').classList.add('hidden');
+  } else {
+    document.getElementById('riderStatusBadge').innerText = "Delivery partner will be assigned ⏳";
+    document.getElementById('riderStatusBadge').className = "text-[9px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded";
+    document.getElementById('riderNameText').innerText = "Waiting for assignment...";
+    document.getElementById('riderPhoneText').innerText = "📞 Store team is reviewing order";
+    document.getElementById('riderCallBtn').classList.add('hidden');
+    document.getElementById('cancelOrderBtn').classList.remove('hidden');
+  }
+}
 
-        function renderProducts() {
-            const grid = document.getElementById('productGrid');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            grid.innerHTML = '';
-            
-            const filtered = products.filter(p => {
-                const matchesCat = activeCategory === 'all' || p.category === activeCategory;
-                const matchesSearch = p.name.toLowerCase().includes(search);
-                return matchesCat && matchesSearch;
-            });
+function toggleWishlist(id) {
+  const i = wishlist.indexOf(id);
+  if (i > -1) wishlist.splice(i, 1); else wishlist.push(id);
+  localStorage.setItem('zipdash_wishlist', JSON.stringify(wishlist));
+  renderProducts();
+  if (!document.getElementById('profileModal').classList.contains('hidden')) openUserProfile();
+}
 
-            document.getElementById('productCountLabel').innerText = `${filtered.length} items`;
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  grid.innerHTML = '';
+  const filtered = products.filter(p => (activeCategory === 'all' || p.category === activeCategory) && p.name.toLowerCase().includes(search));
+  document.getElementById('productCountLabel').innerText = `${filtered.length} items`;
+  filtered.forEach(p => {
+    const qty = cart[p.id] ? cart[p.id].qty : 0;
+    const w = wishlist.includes(p.id);
+    grid.innerHTML += `
+      <div class="bg-white border border-[#e6e2dd] rounded-2xl p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition relative">
+        <button onclick="toggleWishlist(${p.id})" class="absolute top-3 right-3 text-base transition ${w?'text-rose-500':'text-stone-300 hover:text-stone-500'}"><i class="fa-${w?'solid':'regular'} fa-heart"></i></button>
+        <div>
+          <div class="flex justify-between items-center mb-2 pr-6">
+            <span class="text-[9px] bg-emerald-50 text-[#1b4332] font-extrabold px-2 py-0.5 rounded">${p.badge}</span>
+            <span class="text-[9px] text-stone-400 font-semibold">${p.weight}</span>
+          </div>
+          <h4 class="font-bold text-xs text-stone-800 leading-tight mt-1">${p.name}</h4>
+        </div>
+        <div class="mt-3 flex items-center justify-between">
+          <div><span class="font-extrabold text-sm text-[#1b4332]">₹${p.price}</span><span class="text-[10px] text-stone-400 line-through ml-1">₹${p.mrp}</span></div>
+          ${qty === 0 ? `<button onclick="updateQty(${p.id}, 1)" class="bg-[#1b4332] text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-[#143225] transition shadow-sm">ADD +</button>` : `
+          <div class="flex items-center bg-stone-100 rounded-xl overflow-hidden border border-[#e6e2dd]">
+            <button onclick="updateQty(${p.id}, -1)" class="px-2.5 py-1 text-xs">-</button>
+            <span class="px-2 text-xs font-bold text-[#1b4332]">${qty}</span>
+            <button onclick="updateQty(${p.id}, 1)" class="px-2.5 py-1 text-xs">+</button>
+          </div>`}
+        </div>
+      </div>`;
+  });
+}
 
-            filtered.forEach(p => {
-                const qty = cart[p.id] ? cart[p.id].qty : 0;
-                const isWishlisted = wishlist.includes(p.id);
-                grid.innerHTML += `
-                    <div class="bg-white border border-[#e6e2dd] rounded-2xl p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition relative">
-                        <button onclick="toggleWishlist(${p.id})" class="absolute top-3 right-3 text-base transition ${isWishlisted ? 'text-rose-500' : 'text-stone-300 hover:text-stone-500'}">
-                            <i class="fa-${isWishlisted ? 'solid' : 'regular'} fa-heart"></i>
-                        </button>
-                        <div>
-                            <div class="flex justify-between items-center mb-2 pr-6">
-                                <span class="text-[9px] bg-emerald-50 text-[#1b4332] font-extrabold px-2 py-0.5 rounded">${p.badge}</span>
-                                <span class="text-[9px] text-stone-400 font-semibold">${p.weight}</span>
-                            </div>
-                            <h4 class="font-bold text-xs text-stone-800 leading-tight mt-1">${p.name}</h4>
-                        </div>
-                        <div class="mt-3 flex items-center justify-between">
-                            <div>
-                                <span class="font-extrabold text-sm text-[#1b4332]">₹${p.price}</span>
-                                <span class="text-[10px] text-stone-400 line-through ml-1">₹${p.mrp}</span>
-                            </div>
-                            ${qty === 0 ? `
-                                <button onclick="updateQty(${p.id}, 1)" class="bg-[#1b4332] text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-[#143225] transition shadow-sm">ADD +</button>
-                            ` : `
-                                <div class="flex items-center bg-stone-100 rounded-xl overflow-hidden border border-[#e6e2dd]">
-                                    <button onclick="updateQty(${p.id}, -1)" class="px-2.5 py-1 text-xs">-</button>
-                                    <span class="px-2 text-xs font-bold text-[#1b4332]">${qty}</span>
-                                    <button onclick="updateQty(${p.id}, 1)" class="px-2.5 py-1 text-xs">+</button>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
-            });
-        }
+function filterCategory(cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.remove('bg-[#1b4332]', 'text-white');
+    b.classList.add('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]');
+  });
+  const el = document.getElementById(`cat-${cat}`);
+  if (el) { el.classList.add('bg-[#1b4332]', 'text-white'); el.classList.remove('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]'); }
+  renderProducts();
+}
+function filterProducts(){ renderProducts(); }
 
-        window.filterCategory = function(cat) {
-            activeCategory = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-[#1b4332]', 'text-white');
-                btn.classList.add('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]');
-            });
-            if(document.getElementById(`cat-${cat}`)) {
-                document.getElementById(`cat-${cat}`).classList.add('bg-[#1b4332]', 'text-white');
-                document.getElementById(`cat-${cat}`).classList.remove('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]');
-            }
-            renderProducts();
-        };
+function updateQty(id, change) {
+  if (!cart[id]) { if (change > 0) cart[id] = { ...products.find(p => p.id === id), qty: 1 }; }
+  else { cart[id].qty += change; if (cart[id].qty <= 0) delete cart[id]; }
+  updateCartUI(); renderProducts();
+}
 
-        window.filterProducts = function() { renderProducts(); };
+function updateCartUI() {
+  const badge = document.getElementById('cartBadge'), fb = document.getElementById('cartFooterBadge');
+  const list = document.getElementById('cartItemsList'), sug = document.getElementById('cartSuggestionsList');
+  const notice = document.getElementById('cartDeliveryNotice');
+  let count = 0, subtotal = 0;
+  list.innerHTML = ''; sug.innerHTML = '';
+  const keys = Object.keys(cart);
+  if (keys.length === 0) {
+    badge.classList.add('hidden'); fb.innerText = '0';
+    list.innerHTML = `<div class="text-center py-6 text-stone-400 text-xs">Your basket is empty.</div>`;
+  } else {
+    badge.classList.remove('hidden');
+    keys.forEach(k => {
+      const it = cart[k]; count += it.qty; subtotal += it.price * it.qty;
+      list.innerHTML += `
+        <div class="flex items-center justify-between bg-emerald-50/70 p-3 rounded-xl border border-emerald-200">
+          <div><h5 class="font-bold text-xs text-stone-800">${it.name}</h5>
+            <p class="text-[10px] text-stone-500">₹${it.price} × ${it.qty} = <span class="font-bold text-[#1b4332]">₹${it.price * it.qty}</span></p></div>
+          <div class="flex items-center bg-stone-100 rounded-xl overflow-hidden border border-[#e6e2dd]">
+            <button onclick="updateQty(${it.id}, -1)" class="px-2.5 py-1 text-xs">-</button>
+            <span class="px-2 text-xs font-bold text-[#1b4332]">${it.qty}</span>
+            <button onclick="updateQty(${it.id}, 1)" class="px-2.5 py-1 text-xs">+</button>
+          </div>
+        </div>`;
+    });
+  }
+  const rest = products.filter(p => !cart[p.id]);
+  if (rest.length > 0) {
+    rest.slice(0, 5).forEach(pr => {
+      sug.innerHTML += `
+        <div class="bg-white border border-[#e6e2dd] rounded-xl p-2.5 min-w-[130px] flex flex-col justify-between">
+          <div><span class="text-[8px] bg-emerald-50 text-[#1b4332] font-bold px-1.5 py-0.5 rounded">${pr.weight}</span>
+            <h6 class="font-bold text-[11px] text-stone-800 truncate mt-1">${pr.name}</h6></div>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-extrabold text-xs text-[#1b4332]">₹${pr.price}</span>
+            <button onclick="updateQty(${pr.id}, 1)" class="bg-[#1b4332] text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-[#143225] transition">+ Add</button>
+          </div>
+        </div>`;
+    });
+  } else sug.innerHTML = `<span class="text-[11px] text-stone-400 italic">All items added to cart!</span>`;
 
-        window.updateQty = function(id, change) {
-            if (!cart[id]) {
-                if (change > 0) cart[id] = { ...products.find(p => p.id === id), qty: 1 };
-            } else {
-                cart[id].qty += change;
-                if (cart[id].qty <= 0) delete cart[id];
-            }
-            updateCartUI();
-            renderProducts();
-        };
+  badge.innerText = count; fb.innerText = count;
+  const deliveryFee = subtotal >= 100 || subtotal === 0 ? 0 : 20;
+  if (subtotal > 0 && subtotal < 100) {
+    notice.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Add ₹${100 - subtotal} more to unlock free delivery!`;
+    notice.className = "bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center";
+  } else if (subtotal >= 100) {
+    notice.innerHTML = `<i class="fa-solid fa-circle-check"></i> 🎉 Free delivery unlocked!`;
+    notice.className = "bg-emerald-50 border-b border-emerald-200 p-3 text-xs text-emerald-800 font-medium text-center";
+  } else {
+    notice.innerHTML = `<span>Unlock FREE Delivery on orders above ₹100!</span>`;
+    notice.className = "bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center";
+  }
+  const total = Math.max(0, subtotal + deliveryFee - appliedDiscount);
+  document.getElementById('subtotalAmount').innerText = `₹${subtotal}`;
+  document.getElementById('deliveryFeeDisplay').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
+  document.getElementById('totalPayable').innerText = `₹${total}`;
+}
 
-        function updateCartUI() {
-            const badge = document.getElementById('cartBadge');
-            const footerBadge = document.getElementById('cartFooterBadge');
-            const list = document.getElementById('cartItemsList');
-            const notice = document.getElementById('cartDeliveryNotice');
-            
-            let totalCount = 0, subtotal = 0;
-            list.innerHTML = '';
+function toggleCart(){ document.getElementById('cartModal').classList.toggle('hidden'); }
 
-            const keys = Object.keys(cart);
-            if (keys.length === 0) {
-                badge.classList.add('hidden');
-                footerBadge.innerText = '0';
-                list.innerHTML = `<div class="text-center py-12 text-stone-400 text-xs">Your basket is empty.</div>`;
-                notice.innerHTML = `<span>Unlock FREE Delivery on orders above ₹100!</span>`;
-            } else {
-                badge.classList.remove('hidden');
-                keys.forEach(k => {
-                    let item = cart[k];
-                    totalCount += item.qty;
-                    subtotal += item.price * item.qty;
-                    list.innerHTML += `
-                        <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-[#e6e2dd]">
-                            <div>
-                                <h5 class="font-bold text-xs text-stone-800">${item.name}</h5>
-                                <p class="text-[10px] text-stone-500">₹${item.price} × ${item.qty} = <span class="font-bold text-[#1b4332]">₹${item.price * item.qty}</span></p>
-                            </div>
-                            <div class="flex items-center bg-stone-100 rounded-xl overflow-hidden border border-[#e6e2dd]">
-                                <button onclick="updateQty(${item.id}, -1)" class="px-2.5 py-1 text-xs">-</button>
-                                <span class="px-2 text-xs font-bold text-[#1b4332]">${item.qty}</span>
-                                <button onclick="updateQty(${item.id}, 1)" class="px-2.5 py-1 text-xs">+</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
+function openUserProfile() {
+  const email = localStorage.getItem('zipdash_customer_auth') || 'Not logged in';
+  const name = email.includes('@') ? email.split('@')[0].toUpperCase() : "CUSTOMER";
+  document.getElementById('profileGreetingName').innerText = `HEY, ${name}`;
+  document.getElementById('profileUserEmail').innerText = email;
+  const all = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+  const mine = all.filter(o => o.customerEmail === email);
+  const oc = document.getElementById('profileOrdersList');
+  if (mine.length === 0) oc.innerHTML = `<p class="text-stone-400 italic text-[11px]">No orders found.</p>`;
+  else {
+    oc.innerHTML = '';
+    mine.reverse().forEach(o => {
+      oc.innerHTML += `<div class="bg-white p-2 rounded-lg border border-stone-200 text-[11px]">
+        <div class="flex justify-between font-bold text-[#1b4332]"><span>${o.id} (${o.status})</span><span>₹${o.total}</span></div>
+        <p class="text-stone-500 truncate mt-0.5">🛒 ${o.items}</p></div>`;
+    });
+  }
+  const wc = document.getElementById('profileWishlistList');
+  if (wishlist.length === 0) wc.innerHTML = `<p class="text-stone-400 italic text-[11px]">Your wishlist is empty.</p>`;
+  else {
+    wc.innerHTML = '';
+    wishlist.forEach(id => {
+      const it = products.find(p => p.id === id);
+      if (it) wc.innerHTML += `<div class="bg-white flex items-center justify-between p-2 rounded-lg border border-stone-200 text-[11px]">
+        <div><span class="font-bold text-stone-800">${it.name}</span><p class="text-emerald-700 font-semibold">₹${it.price}</p></div>
+        <div class="flex gap-1.5">
+          <button onclick="updateQty(${it.id}, 1); toggleWishlist(${it.id})" class="bg-[#1b4332] text-white text-[10px] font-bold px-2 py-1 rounded-lg">Add</button>
+          <button onclick="toggleWishlist(${it.id})" class="bg-rose-50 text-rose-600 text-[10px] px-2 py-1 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+        </div></div>`;
+    });
+  }
+  document.getElementById('profileModal').classList.remove('hidden');
+}
+function toggleProfileSection(s) {
+  if (s === 'orders') document.getElementById('profileOrdersList').classList.toggle('hidden');
+  else if (s === 'wishlist') document.getElementById('profileWishlistList').classList.toggle('hidden');
+}
+function closeUserProfile(){ document.getElementById('profileModal').classList.add('hidden'); }
+function logoutCustomer(){ localStorage.removeItem('zipdash_customer_auth'); location.reload(); }
 
-            badge.innerText = totalCount;
-            footerBadge.innerText = totalCount;
+function applyPromo() {
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  const subtotal = cartSubtotal();
+  const o = availableOffers.find(x => x.code === code);
+  if (!o) { alert('Invalid promo code.'); return; }
+  if (subtotal < o.minOrder) { alert(`Code "${o.code}" is not eligible! This coupon requires a minimum spend of ₹${o.minOrder} (Your cart subtotal is ₹${subtotal}).`); return; }
+  if (code === 'WELCOME10') appliedDiscount = 10;
+  else if (code === 'FRESH20') appliedDiscount = Math.round(subtotal * 0.20);
+  else if (code === 'QUICK50') appliedDiscount = 50;
+  else if (code === 'SNACK15') appliedDiscount = 15;
+  else if (code === 'ZIPSUPER') appliedDiscount = 30;
+  confetti({ particleCount: 50, spread: 60 });
+  alert(`Promo code ${code} applied successfully!`);
+  updateCartUI();
+}
 
-            let deliveryFee = subtotal >= 100 || subtotal === 0 ? 0 : 20;
+function placeOrderAction() {
+  const name = document.getElementById('custNameInput').value.trim();
+  const mobile = document.getElementById('custMobileInput').value.trim();
+  const address = document.getElementById('deliveryAddress').value.trim().toLowerCase();
+  const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
+  if (!name || !mobile || !address) { alert('Please fill Name, Mobile Number, and Delivery Address.'); return; }
+  const bad = ['outside', 'highway', 'distant', 'airport', 'far', 'remote', 'other city'];
+  if (bad.some(k => address.includes(k))) { alert('Currently not deliverable to this location 😔. We only deliver within 5km zone.'); return; }
+  if (Object.keys(cart).length === 0) { alert('Cart is empty!'); return; }
 
-            if (subtotal > 0 && subtotal < 100) {
-                const diff = 100 - subtotal;
-                notice.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-600"></i> Add ₹${diff} more to unlock free delivery!`;
-                notice.className = "bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center";
-            } else if (subtotal >= 100) {
-                notice.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> 🎉 Free delivery unlocked!`;
-                notice.className = "bg-emerald-50 border-b border-emerald-200 p-3 text-xs text-emerald-800 font-medium text-center";
-            } else {
-                notice.innerHTML = `<span>Unlock FREE Delivery on orders above ₹100!</span>`;
-                notice.className = "bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center";
-            }
+  let subtotal = 0; const items = [];
+  Object.values(cart).forEach(i => { subtotal += i.price * i.qty; items.push(`${i.name} x${i.qty}`); });
+  const fee = subtotal >= 100 ? 0 : 20;
+  const finalTotal = subtotal + fee - appliedDiscount;
+  const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+  const order = {
+    id: orderId, customerName: name, customerMobile: mobile,
+    customerEmail: localStorage.getItem('zipdash_customer_auth') || 'user@zipdash.com',
+    address, items: items.join(', '), total: finalTotal, paymentMode,
+    status: 'Pending', riderName: '', riderPhone: '', riderEmail: '', date: new Date().toISOString()
+  };
+  const all = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+  all.push(order);
+  localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
+  localStorage.setItem('zipdash_current_order_id', orderId);
 
-            let finalPayable = subtotal + deliveryFee - appliedDiscount;
-            if (finalPayable < 0) finalPayable = 0;
+  let message = `🧾 *OFFICIAL BILL INVOICE - ZipDash*\n\n`;
+  message += `👤 *Customer:* ${name} (${mobile})\n`;
+  message += `📍 *Address:* ${address}\n`;
+  message += `💳 *Payment:* ${paymentMode}\n\n`;
+  message += `🛒 *Items:* ${items.join(', ')}\n`;
+  message += `*Total Payable:* ₹${finalTotal}\n\n🎉 Thank you for ordering with ZipDash!`;
 
-            document.getElementById('subtotalAmount').innerText = `₹${subtotal}`;
-            document.getElementById('deliveryFeeDisplay').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
-            document.getElementById('totalPayable').innerText = `₹${finalPayable}`;
-        }
+  const hiddenIframe = document.createElement('iframe');
+  hiddenIframe.style.display = 'none';
+  hiddenIframe.src = `https://api.whatsapp.com/send?phone=919876543210&text=${encodeURIComponent(message)}`;
+  document.body.appendChild(hiddenIframe);
 
-        window.toggleCart = function() { document.getElementById('cartModal').classList.toggle('hidden'); };
+  toggleCart();
+  triggerHeartBoxAnimation();
+  checkActiveOrderStatus();
 
-        window.openUserProfile = function() {
-            const savedEmail = localStorage.getItem('zipdash_customer_auth') || 'Not logged in';
-            let userName = savedEmail.includes('@') ? savedEmail.split('@')[0].toUpperCase() : "CUSTOMER";
+  if (paymentMode === 'Online') {
+    const businessUpiId = "yourname@oksbi";
+    const upiUrl = `upi://pay?pa=${businessUpiId}&pn=${encodeURIComponent("ZipDash Store")}&am=${finalTotal}&cu=INR&tn=Order_${orderId}`;
+    setTimeout(() => { window.location.href = upiUrl; }, 1500);
+  }
+}
 
-            document.getElementById('profileGreetingName').innerText = `HEY, ${userName}`;
-            document.getElementById('profileUserEmail').innerText = savedEmail;
+function triggerHeartBoxAnimation() {
+  document.getElementById('uniqueQuoteText').innerText = uniqueQuotes[Math.floor(Math.random() * uniqueQuotes.length)];
+  document.getElementById('heartBoxModal').classList.remove('hidden');
+  confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+  let t = 5;
+  document.getElementById('countdownTimer').innerText = t;
+  if (heartTimer) clearInterval(heartTimer);
+  heartTimer = setInterval(() => {
+    t--; document.getElementById('countdownTimer').innerText = t;
+    if (t <= 0) { clearInterval(heartTimer); closeHeartBoxAndTrack(); }
+  }, 1000);
+}
+function closeHeartBoxAndTrack() {
+  if (heartTimer) clearInterval(heartTimer);
+  document.getElementById('heartBoxModal').classList.add('hidden');
+  openLiveTracking();
+}
+function openLiveTracking() {
+  checkActiveOrderStatus();
+  const id = localStorage.getItem('zipdash_current_order_id');
+  const all = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+  const cur = all.find(o => o.id === id);
+  if (cur && cur.address) {
+    document.getElementById('liveMapFrame').src = `https://maps.google.com/maps?q=${encodeURIComponent(cur.address + ", Mumbai")}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    document.getElementById('modalOrderIdText').innerText = `Order ID: ${cur.id}`;
+    document.getElementById('modalOrderStatusText').innerText = `Status: ${cur.status}`;
+    document.getElementById('modalOrderItemsText').innerText = cur.items;
+    document.getElementById('modalOrderAddressText').innerText = cur.address;
+    document.getElementById('modalOrderTotalText').innerText = `₹${cur.total}`;
+  }
+  document.getElementById('liveTrackingModal').classList.remove('hidden');
+}
+function closeLiveTracking(){ document.getElementById('liveTrackingModal').classList.add('hidden'); }
 
-            let userOrders = liveOrdersList.filter(o => o.customerEmail === savedEmail);
-            let ordersContainer = document.getElementById('profileOrdersList');
-            
-            if (userOrders.length === 0) {
-                ordersContainer.innerHTML = `<p class="text-stone-400 italic text-[11px]">No orders found.</p>`;
-            } else {
-                ordersContainer.innerHTML = '';
-                userOrders.slice().reverse().forEach(ord => {
-                    ordersContainer.innerHTML += `
-                        <div class="bg-white p-2 rounded-lg border border-stone-200 text-[11px]">
-                            <div class="flex justify-between font-bold text-[#1b4332]">
-                                <span>${ord.id} (${ord.status})</span>
-                                <span>₹${ord.total}</span>
-                            </div>
-                            <p class="text-stone-500 truncate mt-0.5">🛒 ${ord.items}</p>
-                        </div>
-                    `;
-                });
-            }
-
-            let wishlistContainer = document.getElementById('profileWishlistList');
-            if (wishlist.length === 0) {
-                wishlistContainer.innerHTML = `<p class="text-stone-400 italic text-[11px]">Your wishlist is empty.</p>`;
-            } else {
-                wishlistContainer.innerHTML = '';
-                wishlist.forEach(id => {
-                    let item = products.find(p => p.id === id);
-                    if (item) {
-                        wishlistContainer.innerHTML += `
-                            <div class="bg-white flex items-center justify-between p-2 rounded-lg border border-stone-200 text-[11px]">
-                                <div>
-                                    <span class="font-bold text-stone-800">${item.name}</span>
-                                    <p class="text-emerald-700 font-semibold">₹${item.price}</p>
-                                </div>
-                                <div class="flex gap-1.5">
-                                    <button onclick="updateQty(${item.id}, 1); toggleWishlist(${item.id})" class="bg-[#1b4332] text-white text-[10px] font-bold px-2 py-1 rounded-lg">Add</button>
-                                    <button onclick="toggleWishlist(${item.id})" class="bg-rose-50 text-rose-600 text-[10px] px-2 py-1 rounded-lg"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            }
-
-            document.getElementById('profileModal').classList.remove('hidden');
-        };
-
-        window.toggleProfileSection = function(section) {
-            if (section === 'orders') {
-                document.getElementById('profileOrdersList').classList.toggle('hidden');
-            } else if (section === 'wishlist') {
-                document.getElementById('profileWishlistList').classList.toggle('hidden');
-            }
-        };
-
-        window.closeUserProfile = function() { document.getElementById('profileModal').classList.add('hidden'); };
-        window.logoutCustomer = function() { localStorage.removeItem('zipdash_customer_auth'); location.reload(); };
-
-        window.applyPromo = function() {
-            if (document.getElementById('promoInput').value.trim().toUpperCase() === 'WELCOME10') {
-                appliedDiscount = 10;
-                confetti({ particleCount: 50, spread: 60 });
-                alert('Promo applied! ₹10 off.');
-            } else { alert('Invalid code.'); }
-            updateCartUI();
-        };
-
-        window.placeOrderAction = async function() {
-            const name = document.getElementById('custNameInput').value.trim();
-            const mobile = document.getElementById('custMobileInput').value.trim();
-            const address = document.getElementById('deliveryAddress').value.trim().toLowerCase();
-            const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
-
-            if (!name || !mobile || !address) {
-                alert('Please fill Name, Mobile Number, and Delivery Address.');
-                return;
-            }
-
-            const outOfRangeKeywords = ['outside', 'highway', 'distant', 'airport', 'far', 'remote', 'other city'];
-            const isOutOfRange = outOfRangeKeywords.some(keyword => address.includes(keyword));
-
-            if (isOutOfRange) {
-                alert('Currently not deliverable to this location 😔. We only deliver within 5km zone.');
-                return;
-            }
-
-            if (Object.keys(cart).length === 0) { alert('Cart is empty!'); return; }
-
-            let subtotal = 0, itemsSummary = [];
-            Object.values(cart).forEach(item => {
-                subtotal += item.price * item.qty;
-                itemsSummary.push(`${item.name} x${item.qty}`);
-            });
-            let deliveryFee = subtotal >= 100 ? 0 : 20;
-            let finalTotal = subtotal + deliveryFee - appliedDiscount;
-
-            let orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
-            let newOrder = {
-                id: orderId,
-                customerName: name,
-                customerMobile: mobile,
-                customerEmail: localStorage.getItem('zipdash_customer_auth') || 'user@zipdash.com',
-                address: address,
-                items: itemsSummary.join(', '),
-                total: finalTotal,
-                paymentMode: paymentMode,
-                status: 'Pending',
-                riderName: '',
-                riderPhone: '',
-                riderEmail: '',
-                date: new Date().toISOString()
-            };
-
-            try {
-                // Save order directly to Firestore database
-                await addDoc(collection(db, "orders"), newOrder);
-                localStorage.setItem('zipdash_current_order_id', orderId);
-
-                let message = `🧾 *OFFICIAL BILL INVOICE - ZipDash*\n\n`;
-                message += `👤 *Customer:* ${name} (${mobile})\n`;
-                message += `📍 *Address:* ${address}\n`;
-                message += `💳 *Payment:* ${paymentMode}\n\n`;
-                message += `🛒 *Items:* ${itemsSummary.join(', ')}\n`;
-                message += `*Total Payable:* ₹${finalTotal}\n\n🎉 Thank you!`;
-
-                const hiddenIframe = document.createElement('iframe');
-                hiddenIframe.style.display = 'none';
-                hiddenIframe.src = `https://api.whatsapp.com/send?phone=919876543210&text=${encodeURIComponent(message)}`;
-                document.body.appendChild(hiddenIframe);
-
-                toggleCart();
-                triggerHeartBoxAnimation();
-                checkActiveOrderStatus();
-
-                if (paymentMode === 'Online') {
-                    const businessUpiId = "yourname@oksbi"; 
-                    const upiUrl = `upi://pay?pa=${businessUpiId}&pn=${encodeURIComponent("ZipDash Store")}&am=${finalTotal}&cu=INR&tn=Order_${orderId}`;
-                    setTimeout(() => { window.location.href = upiUrl; }, 1500);
-                }
-            } catch (error) {
-                console.error("Error adding order: ", error);
-                alert("Failed to place order. Please try again.");
-            }
-        };
-
-        function triggerHeartBoxAnimation() {
-            document.getElementById('uniqueQuoteText').innerText = uniqueQuotes[Math.floor(Math.random() * uniqueQuotes.length)];
-            document.getElementById('heartBoxModal').classList.remove('hidden');
-            confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
-
-            let timeLeft = 5;
-            document.getElementById('countdownTimer').innerText = timeLeft;
-            if(heartTimer) clearInterval(heartTimer);
-
-            heartTimer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('countdownTimer').innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(heartTimer);
-                    closeHeartBoxAndTrack();
-                }
-            }, 1000);
-        }
-
-        window.closeHeartBoxAndTrack = function() {
-            if(heartTimer) clearInterval(heartTimer);
-            document.getElementById('heartBoxModal').classList.add('hidden');
-            window.openLiveTracking();
-        };
-
-        window.openLiveTracking = function() {
-            checkActiveOrderStatus();
-            let activeOrderId = localStorage.getItem('zipdash_current_order_id');
-            let currentOrder = liveOrdersList.find(o => o.id === activeOrderId);
-
-            if (currentOrder && currentOrder.address) {
-                let encodedAddress = encodeURIComponent(currentOrder.address + ", Mumbai");
-                document.getElementById('liveMapFrame').src = `https://maps.google.com/maps?q=${encodedAddress}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-                
-                document.getElementById('modalOrderIdText').innerText = `Order ID: ${currentOrder.id}`;
-                document.getElementById('modalOrderStatusText').innerText = `Status: ${currentOrder.status}`;
-                document.getElementById('modalOrderItemsText').innerText = currentOrder.items;
-                document.getElementById('modalOrderAddressText').innerText = currentOrder.address;
-                document.getElementById('modalOrderTotalText').innerText = `₹${currentOrder.total}`;
-            }
-
-            document.getElementById('liveTrackingModal').classList.remove('hidden');
-        };
-
-        window.closeLiveTracking = function() { document.getElementById('liveTrackingModal').classList.add('hidden'); };
-
-        window.cancelActiveOrder = async function() {
-            let activeOrderId = localStorage.getItem('zipdash_current_order_id');
-            let ord = liveOrdersList.find(o => o.id === activeOrderId);
-            if (ord && ord.docId) {
-                try {
-                    await updateDoc(doc(db, "orders", ord.docId), { status: 'Cancelled' });
-                    localStorage.removeItem('zipdash_current_order_id');
-                    
-                    cart = {};
-                    updateCartUI();
-                    renderProducts();
-
-                    alert('Order Cancelled Successfully.');
-                    closeLiveTracking();
-                    checkActiveOrderStatus();
-                } catch (e) {
-                    console.error("Error cancelling order:", e);
-                }
-            }
-        };
-
-        window.sendChatMessage = function() {
-            const input = document.getElementById('chatInput');
-            if (!input.value.trim()) return;
-            const chatBox = document.getElementById('chatMessagesBox');
-            chatBox.innerHTML += `<div class="bg-stone-100 text-stone-800 p-2 rounded-xl text-[11px] w-fit max-w-[85%] ml-auto font-medium">${input.value}</div>`;
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-
-        window.startVoiceOrder = function() { alert('Voice search ready.'); };
-        window.closeVoiceModal = function() {};
-    </script>
+function cancelActiveOrder() {
+  const id = localStorage.getItem('zipdash_current_order_id');
+  const all = JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+  const o = all.find(x => x.id === id);
+  if (o) {
+    o.status = 'Cancelled';
+    localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
+    localStorage.removeItem('zipdash_current_order_id');
+    cart = {}; updateCartUI(); renderProducts();
+    alert('Order Cancelled Successfully.');
+    closeLiveTracking(); checkActiveOrderStatus();
+  }
+}
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  if (!input.value.trim()) return;
+  const box = document.getElementById('chatMessagesBox');
+  const div = document.createElement('div');
+  div.className = "bg-stone-100 text-stone-800 p-2 rounded-xl text-[11px] w-fit max-w-[85%] ml-auto font-medium";
+  div.textContent = input.value;
+  box.appendChild(div);
+  input.value = ''; box.scrollTop = box.scrollHeight;
+}
+</script>
 </body>
 </html>
