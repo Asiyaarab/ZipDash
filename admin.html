@@ -117,6 +117,10 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
       <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Revenue</p><h3 id="reportTotalRevenue" class="text-xl font-extrabold text-[#1b4332] mt-1">₹0</h3></div>
       <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Orders</p><h3 id="reportTotalCount" class="text-xl font-extrabold text-emerald-600 mt-1">0</h3></div>
     </div>
+    <!-- EXCEL EXPORT BUTTON ADDED HERE -->
+    <button onclick="exportOrdersToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
+      <i class="fa-solid fa-file-excel text-sm"></i> Download Updated Excel Report (CSV)
+    </button>
     <div id="reportsOrdersList" class="space-y-2.5"></div>
   </div>
 
@@ -424,6 +428,52 @@ function renderReports() {
         <p class="text-[10px] text-stone-500">🛒 ${ord.items}</p>
       </div>`;
   });
+}
+
+// EXCEL EXPORT FUNCTION ADDED
+function exportOrdersToExcel() {
+  const allOrders = orders();
+  if (allOrders.length === 0) {
+    alert('No orders found to export!');
+    return;
+  }
+
+  let csvContent = "ZipDash Master Orders & Revenue Report\n";
+  csvContent += `Generated On,${new Date().toLocaleString()}\n`;
+  csvContent += `Total Orders Count,${allOrders.length}\n`;
+  
+  const totalRevenue = allOrders.reduce((sum, o) => o.status === 'Delivered' ? sum + Number(o.total) : sum, 0);
+  csvContent += `Total Delivered Revenue (INR),Rs. ${totalRevenue}\n\n`;
+
+  csvContent += "Order ID,Customer Name,Mobile,Email,Delivery Address,Ordered Items,Amount (INR),Payment Mode,Status,Rider Name,Order Date\n";
+
+  allOrders.forEach(ord => {
+    let row = [
+      ord.id,
+      `"${ord.customerName || ''}"`,
+      ord.customerMobile || '',
+      ord.customerEmail || '',
+      `"${(ord.address || '').replace(/"/g, '""')}"`,
+      `"${(ord.items || '').replace(/"/g, '""')}"`,
+      ord.total || 0,
+      ord.paymentMode || 'COD',
+      ord.status || 'Pending',
+      `"${ord.riderName || 'Unassigned'}"`,
+      `"${new Date(ord.date || Date.now()).toLocaleString()}"`
+    ];
+    csvContent += row.join(",") + "\n";
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ZipDash_Master_Orders_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  
+  showAdminToast("📊 Excel report updated with all records successfully!");
 }
 
 renderAdminPanel();
