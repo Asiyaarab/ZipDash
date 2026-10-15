@@ -691,23 +691,28 @@ function cancelActiveOrder() {
   if (o) {
     o.status = 'Cancelled';
     localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
-    localStorage.removeItem('zipdash_current_order_id');
-    cart = {}; updateCartUI(); renderProducts();
-    
-    closeLiveTracking();
-    
-    // Hide active order banner and header track button immediately
-    document.getElementById('activeOrderBanner').classList.add('hidden');
-    document.getElementById('trackBtnHeader').classList.add('hidden');
-    
-    // Show cancellation banner correctly
-    const cancelBanner = document.getElementById('cancelledOrderBanner');
-    cancelBanner.classList.remove('hidden');
-    setTimeout(() => {
-      cancelBanner.classList.add('hidden');
-    }, 4000);
   }
+  
+  localStorage.removeItem('zipdash_current_order_id');
+  cart = {}; 
+  updateCartUI(); 
+  renderProducts();
+  
+  closeLiveTracking();
+  
+  // Hide active order banner and header track button immediately
+  document.getElementById('activeOrderBanner').classList.add('hidden');
+  document.getElementById('trackBtnHeader').classList.add('hidden');
+  
+  // Show cancellation banner correctly without redirecting
+  const cancelBanner = document.getElementById('cancelledOrderBanner');
+  cancelBanner.classList.remove('hidden');
+  
+  setTimeout(() => {
+    cancelBanner.classList.add('hidden');
+  }, 5000);
 }
+
 function sendChatMessage() {
   const input = document.getElementById('chatInput');
   if (!input.value.trim()) return;
