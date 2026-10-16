@@ -61,9 +61,13 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
     <div class="space-y-3 text-xs">
       <input type="hidden" id="editItemIndex" value="-1">
       <div><label class="block font-bold text-stone-700 mb-1">Category *</label>
-        <select id="newItemCategory" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-          <option value="Dairy">Dairy & Breakfast</option><option value="Snacks">Munchies & Biscuits</option><option value="Drinks">Chilled Drinks</option>
-        </select></div>
+        <select id="newItemCategory" onchange="document.getElementById('newCatBox').style.display=this.value==='__new__'?'block':'none'" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+          <option value="Snacks &amp; Instant">Snacks &amp; Instant</option><option value="Drinks &amp; Beverages">Drinks &amp; Beverages</option><option value="Dairy &amp; Breakfast">Dairy &amp; Breakfast</option><option value="Biscuits &amp; Chocolates">Biscuits &amp; Chocolates</option></select>
+        <div id="newCatBox" style="display:none;margin-top:6px"><input id="newCatName" placeholder="New category name" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+          <div style="display:flex;gap:6px;margin-top:6px"><input id="newCatGroup" list="zdGroups" placeholder="Section (e.g. Grocery &amp; Kitchen)" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"><input id="newCatIcon" placeholder="Icon 🛒" style="max-width:80px" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div><datalist id="zdGroups"></datalist></div>
+        <label class="block font-bold text-stone-700 text-xs mb-1" style="margin-top:10px">Container type (bottle, can, packet…)</label>
+        <select id="newItemContainer" onchange="document.getElementById('newContainerName').style.display=this.value==='__new__'?'block':'none'" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"><option value="">— none —</option></select>
+        <input id="newContainerName" placeholder="New container type" style="display:none;margin-top:6px" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
       <div><label class="block font-bold text-stone-700 mb-1">Product Name *</label>
         <input type="text" id="newItemName" placeholder="e.g. Fresh Coconut Water" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
       <div class="grid grid-cols-2 gap-2">
@@ -117,10 +121,6 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
       <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Revenue</p><h3 id="reportTotalRevenue" class="text-xl font-extrabold text-[#1b4332] mt-1">₹0</h3></div>
       <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Orders</p><h3 id="reportTotalCount" class="text-xl font-extrabold text-emerald-600 mt-1">0</h3></div>
     </div>
-    <!-- EXCEL EXPORT BUTTON ADDED HERE -->
-    <button onclick="exportOrdersToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
-      <i class="fa-solid fa-file-excel text-sm"></i> Download Updated Excel Report (CSV)
-    </button>
     <div id="reportsOrdersList" class="space-y-2.5"></div>
   </div>
 
@@ -132,23 +132,12 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
   </div>
 </main>
 
+<script src="zipdash-db.js"></script>
 <script>
-const defaultInventory = [
-            { id: 1, name: "Fresh Toned Milk", category: "Dairy", weight: "500 ml Pouch", price: 32, stock: 20, mrp: 35, badge: "DAILY ESSENTIAL" },
-            { id: 2, name: "Fresh Curd (Dahi)", category: "Dairy", weight: "400 g Cup", price: 35, stock: 20, mrp: 40, badge: "FRESH BATCH" },
-            { id: 3, name: "Malai Paneer", category: "Dairy", weight: "200 g Pack", price: 85, stock: 20, mrp: 95, badge: "13% OFF" },
-            { id: 4, name: "Amul Butter Pack", category: "Dairy", weight: "100 g Pack", price: 60, stock: 20, mrp: 62, badge: "BEST SELLER" },
-            { id: 5, name: "Fresh Lassi Bottle", category: "Drinks", weight: "200 ml Bottle", price: 25, stock: 20, mrp: 30, badge: "CHILLED" },
-            { id: 6, name: "Cold Coffee", category: "Drinks", weight: "180 ml Can", price: 35, stock: 20, mrp: 40, badge: "REFRESHING" },
-            { id: 7, name: "Natural Orange Juice", category: "Drinks", weight: "250 ml Carton", price: 30, stock: 20, mrp: 35, badge: "100% JUICE" },
-            { id: 8, name: "Traditional Aloo Bhujia", category: "Snacks", weight: "150 g Pouch", price: 35, stock: 20, mrp: 40, badge: "CRUNCHY" },
-            { id: 9, name: "Crunchy Atta Biscuits", category: "Snacks", weight: "200 g Pack", price: 40, stock: 20, mrp: 50, badge: "TEA TIME" },
-            { id: 10, name: "Rusk Toast Family Pack", category: "Snacks", weight: "250 g Pack", price: 45, stock: 20, mrp: 55, badge: "FAMILY PACK" }
-        ];
-let inventory = JSON.parse(localStorage.getItem('zipdash_admin_inventory_v2') || JSON.stringify(defaultInventory));
+let inventory = [], ORDERS = [];
 let activeFilter = 'all';
 let reportPeriod = 'weekly';
-const orders = () => JSON.parse(localStorage.getItem('zipdash_all_orders') || '[]');
+const orders = () => ORDERS;
 
 function showAdminToast(message) {
   const toast = document.getElementById('adminToastBanner');
@@ -200,12 +189,17 @@ function renderLiveOrders() {
             <p><b>Customer:</b> ${ord.customerName} (${ord.customerMobile})</p>
             <p><b>Items:</b> ${ord.items}</p>
             <p><b>Address:</b> ${ord.address}</p>
+            <p><b>Payment:</b> ${ord.paymentMode} - ${ord.paymentStatus}</p>
+            ${(ord.chat || []).slice(-3).map(m => `<p class="text-[11px] text-stone-500">${m.from === 'c' ? '👤' : m.from === 'r' ? '🛵' : '🏪'} ${escA(m.t)}</p>`).join('')}
             <p class="font-extrabold text-[#1b4332]">Total: ₹${ord.total}</p>
             ${ord.riderName ? `<p class="text-emerald-700 font-bold">🛵 Assigned Rider: ${ord.riderName} (${ord.riderPhone})</p>` : ''}
           </div>
-          <div class="flex gap-2 pt-2">
+          <div class="flex flex-wrap gap-2 pt-2">
             <button onclick="openAssignModal('${ord.id}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">${ord.riderName ? 'Re-assign Rider' : 'Pending (Assign Rider)'}</button>
             <button onclick="markOrderDelivered('${ord.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">Mark Delivered ✓</button>
+            ${ord.paymentMode === 'Online' && ord.paymentStatus !== 'Paid' ? `<button onclick="markPaid('${ord.docId}')" class="bg-sky-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">💰 Mark Paid</button>` : ''}
+            <button onclick="replyChat('${ord.docId}')" class="bg-stone-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">💬 Chat${(ord.chat || []).length ? ' (' + ord.chat.length + ')' : ''}</button>
+            ${ord.riderName ? `<button onclick="sendRiderLink('${ord.docId}','${ord.riderPhone}')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">📲 Send rider link</button>` : ''}
           </div>
         </div>`;
     });
@@ -241,8 +235,7 @@ function saveDeliveryAssignment() {
   const all = orders();
   const ord = all.find(o => o.id === orderId);
   if (ord) {
-    ord.riderName = name; ord.riderPhone = phone; ord.riderEmail = email; ord.status = 'Out for Delivery';
-    localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
+    ZD.updateOrder(ord.docId, { riderName: name, riderPhone: phone, riderEmail: email, status: 'Out for Delivery' });
     showAdminToast(`Successfully assigned ${name} to order ${orderId}!`);
     closeAssignModal(); renderLiveOrders();
   }
@@ -252,8 +245,7 @@ function markOrderDelivered(orderId) {
   const all = orders();
   const ord = all.find(o => o.id === orderId);
   if (ord) {
-    ord.status = 'Delivered';
-    localStorage.setItem('zipdash_all_orders', JSON.stringify(all));
+    ZD.updateOrder(ord.docId, { status: 'Delivered', paymentStatus: ord.paymentMode === 'Online' ? ord.paymentStatus : 'Paid' });
     localStorage.removeItem('zipdash_current_order_id');
     showAdminToast(`Order ${orderId} marked as Delivered!`);
     renderLiveOrders();
@@ -262,7 +254,7 @@ function markOrderDelivered(orderId) {
 
 function resetItemForm() {
   document.getElementById('editItemIndex').value = '-1';
-  document.getElementById('newItemCategory').value = 'Dairy';
+  document.getElementById('newItemCategory').selectedIndex = 0; document.getElementById('newItemContainer').value = ''; ['newCatName','newCatGroup','newCatIcon','newContainerName'].forEach(i => document.getElementById(i).value = ''); document.getElementById('newCatBox').style.display = 'none'; document.getElementById('newContainerName').style.display = 'none';
   ['newItemName','newItemSize','newItemPrice','newItemImage'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('newItemStock').value = '20';
 }
@@ -276,7 +268,7 @@ function openEditItemModal(id) {
   const it = inventory.find(i => i.id === id);
   if (!it) return;
   document.getElementById('editItemIndex').value = String(id);
-  document.getElementById('newItemCategory').value = it.category;
+  document.getElementById('newItemCategory').value = it.category; document.getElementById('newItemContainer').value = it.container || ''; document.getElementById('newCatBox').style.display = 'none'; document.getElementById('newContainerName').style.display = 'none';
   document.getElementById('newItemName').value = it.name;
   document.getElementById('newItemSize').value = it.weight || '';
   document.getElementById('newItemPrice').value = it.price;
@@ -293,20 +285,28 @@ function saveItemData() {
   const price = parseFloat(document.getElementById('newItemPrice').value);
   const stock = parseInt(document.getElementById('newItemStock').value);
   const weight = document.getElementById('newItemSize').value.trim();
-  const category = document.getElementById('newItemCategory').value;
+  let category = document.getElementById('newItemCategory').value, container = document.getElementById('newItemContainer').value;
+  const cats = (ZS && ZS.categories) || [], cons = (ZS && ZS.containers) || [];
+  if (category === '__new__') {
+    const n = document.getElementById('newCatName').value.trim(); if (!n) { alert('Enter the new category name.'); return; }
+    category = n;
+    if (!cats.some(c => c.name.toLowerCase() === n.toLowerCase())) ZD.saveSettings({ categories: [...cats, { name: n, group: document.getElementById('newCatGroup').value.trim() || 'Other', icon: document.getElementById('newCatIcon').value.trim() || '🛒' }] });
+  }
+  if (container === '__new__') {
+    const n = document.getElementById('newContainerName').value.trim(); if (!n) { alert('Enter the new container type.'); return; }
+    container = n; if (!cons.includes(n)) ZD.saveSettings({ containers: [...cons, n] });
+  }
   if (!name || isNaN(price) || isNaN(stock)) { alert('Fill mandatory fields.'); return; }
-  const editId = parseInt(document.getElementById('editItemIndex').value);
+  const editId = document.getElementById('editItemIndex').value;
   const image = document.getElementById('newItemImage').value.trim();
-  if (editId !== -1) {
-    const it = inventory.find(i => i.id === editId);
-    if (it) Object.assign(it, { name, category, weight, price, stock, image });
+  if (editId !== '-1') {
+    ZD.mutateProducts(l => { const it = l.find(i => i.id === editId); if (it) Object.assign(it, { name, category, container, weight, price, stock, image }); });
     showAdminToast(`✨ ${name} edited successfully!`);
   } else {
-    inventory.push({ id: Date.now(), name, category, weight, price, mrp: price, badge: 'NEW', stock, image });
+    ZD.mutateProducts(l => l.push({ id: 'p' + Date.now(), name, category, weight, price, mrp: price, badge: 'NEW', stock, image, container, order: l.length + 1 }));
     showAdminToast(`🎉 ${name} added successfully!`);
   }
-  localStorage.setItem('zipdash_admin_inventory_v2', JSON.stringify(inventory));
-  closeAddItemModal(); renderAdminPanel();
+  closeAddItemModal();
 }
 
 const pending = {}; // units waiting to be added/removed (shown between - and +)
@@ -325,12 +325,7 @@ function applyStock(id) {
 }
 
 function adjustStock(id, amount) {
-  const item = inventory.find(i => i.id === id);
-  if (item) {
-    item.stock = Math.max(0, item.stock + amount);
-    localStorage.setItem('zipdash_admin_inventory_v2', JSON.stringify(inventory));
-    renderAdminPanel();
-  }
+  ZD.mutateProducts(l => { const it = l.find(i => i.id === id); if (it) it.stock = Math.max(0, (Number(it.stock) || 0) + amount); });
 }
 
 function setFilter(filter) {
@@ -342,20 +337,31 @@ function setFilter(filter) {
   renderAdminPanel();
 }
 
+const es = i => i.oos ? 0 : (Number(i.stock) || 0);
+function deleteItem(id) { const it = inventory.find(i => i.id === id); if (it && confirm(`Delete "${it.name}" permanently? (Use "Out of stock" if you only want to hide it for now.)`)) { ZD.mutateProducts(l => { const k = l.findIndex(i => i.id === id); if (k > -1) l.splice(k, 1); }); showAdminToast('Product deleted'); } }
+function markPaid(id) { ZD.updateOrder(id, { paymentStatus: 'Paid' }); showAdminToast('Marked as paid'); }
+function replyChat(id) { const t = prompt('Reply to customer:'); if (t && t.trim()) ZD.addChat(id, { from: 's', t: t.trim(), at: Date.now() }); }
+function sendRiderLink(id, phone) {
+  if (!window.ZD_CLOUD) { alert('The rider page needs Firebase to be connected (zipdash-db.js). Until then the rider cannot see this order on their phone.'); return; }
+  let p = String(phone || '').replace(/\D/g, ''); if (p.length === 10) p = '91' + p;
+  const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'rider.html?o=' + id;
+  window.open(`https://wa.me/${p}?text=${encodeURIComponent('ZipDash delivery - open this link, tap Start sharing location: ' + url)}`, '_blank');
+}
+function toggleOOS(id) { ZD.mutateProducts(l => { const it = l.find(i => i.id === id); if (it) it.oos = !it.oos; }); }
 function renderAdminPanel() {
   const list = document.getElementById('adminInventoryList');
   const search = document.getElementById('adminSearchInput').value.toLowerCase();
   list.innerHTML = '';
   document.getElementById('badge-all').innerText = inventory.length;
-  document.getElementById('badge-instock').innerText = inventory.filter(i => i.stock > 5).length;
-  document.getElementById('badge-lowstock').innerText = inventory.filter(i => i.stock > 0 && i.stock <= 5).length;
-  document.getElementById('badge-outstock').innerText = inventory.filter(i => i.stock === 0).length;
+  document.getElementById('badge-instock').innerText = inventory.filter(i => es(i) > 5).length;
+  document.getElementById('badge-lowstock').innerText = inventory.filter(i => es(i) > 0 && es(i) <= 5).length;
+  document.getElementById('badge-outstock').innerText = inventory.filter(i => es(i) === 0).length;
 
   const filtered = inventory.filter(item => {
     if (!item.name.toLowerCase().includes(search)) return false;
-    if (activeFilter === 'instock') return item.stock > 5;
-    if (activeFilter === 'lowstock') return item.stock > 0 && item.stock <= 5;
-    if (activeFilter === 'outstock') return item.stock === 0;
+    if (activeFilter === 'instock') return es(item) > 5;
+    if (activeFilter === 'lowstock') return es(item) > 0 && es(item) <= 5;
+    if (activeFilter === 'outstock') return es(item) === 0;
     return true;
   });
 
@@ -366,8 +372,8 @@ function renderAdminPanel() {
 
   filtered.forEach(item => {
     let badgeClass = "bg-emerald-100 text-emerald-800", badgeText = "In Stock";
-    if (item.stock === 0) { badgeClass = "bg-rose-100 text-rose-800"; badgeText = "Out of Stock"; }
-    else if (item.stock <= 5) { badgeClass = "bg-amber-100 text-amber-800"; badgeText = "Low Stock"; }
+    if (es(item) === 0) { badgeClass = "bg-rose-100 text-rose-800"; badgeText = "Out of Stock"; }
+    else if (es(item) <= 5) { badgeClass = "bg-amber-100 text-amber-800"; badgeText = "Low Stock"; }
     list.innerHTML += `
       <div class="border bg-white rounded-2xl p-3.5 shadow-sm space-y-2 flex flex-col justify-between">
         <div class="flex justify-between items-start">
@@ -380,13 +386,15 @@ function renderAdminPanel() {
           <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${badgeClass}">${badgeText}</span>
         </div>
         <div class="flex flex-wrap gap-2 justify-between items-center pt-2 border-t border-stone-100">
-          <span class="text-xs font-extrabold text-[#1b4332]">Stock: ${item.stock} units</span>
+          <span class="text-xs font-extrabold text-[#1b4332]">Stock: ${item.stock} units${item.oos ? ' (marked out of stock)' : ''}</span>
           <div class="flex items-center gap-1">
-            <button onclick="openEditItemModal(${item.id})" class="bg-[#d4a373]/30 text-[#1b4332] px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#d4a373]/50 transition"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button onclick="bumpStock(${item.id}, -1)" class="bg-rose-50 text-rose-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-rose-100 transition" title="Reduce stock">−</button>
+            <button onclick="toggleOOS('${item.id}')" class="${item.oos ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100' : 'bg-rose-50 text-rose-800 hover:bg-rose-100'} px-2.5 py-1 rounded-lg text-xs font-bold transition">${item.oos ? '✅ Back in stock' : '🚫 Out of stock'}</button>
+            <button onclick="openEditItemModal('${item.id}')" class="bg-[#d4a373]/30 text-[#1b4332] px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#d4a373]/50 transition"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button onclick="deleteItem('${item.id}')" class="bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-rose-100 transition" title="Delete product">🗑</button>
+            <button onclick="bumpStock('${item.id}', -1)" class="bg-rose-50 text-rose-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-rose-100 transition" title="Reduce stock">−</button>
             <span class="min-w-[2.25rem] text-center text-xs font-extrabold ${(pending[item.id] || 0) > 0 ? 'text-emerald-700' : (pending[item.id] || 0) < 0 ? 'text-rose-700' : 'text-stone-400'}">${(pending[item.id] || 0) > 0 ? '+' + pending[item.id] : (pending[item.id] || 0)}</span>
-            <button onclick="bumpStock(${item.id}, 1)" class="bg-emerald-50 text-emerald-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-emerald-100 transition" title="Add stock">+</button>
-            ${(pending[item.id] || 0) !== 0 ? `<button onclick="applyStock(${item.id})" class="bg-[#1b4332] text-white px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#143225] transition">Apply</button>` : ''}
+            <button onclick="bumpStock('${item.id}', 1)" class="bg-emerald-50 text-emerald-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-emerald-100 transition" title="Add stock">+</button>
+            ${(pending[item.id] || 0) !== 0 ? `<button onclick="applyStock('${item.id}')" class="bg-[#1b4332] text-white px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#143225] transition">Apply</button>` : ''}
             
           </div>
         </div>
@@ -430,53 +438,84 @@ function renderReports() {
   });
 }
 
-// EXCEL EXPORT FUNCTION ADDED
-function exportOrdersToExcel() {
-  const allOrders = orders();
-  if (allOrders.length === 0) {
-    alert('No orders found to export!');
-    return;
-  }
-
-  let csvContent = "ZipDash Master Orders & Revenue Report\n";
-  csvContent += `Generated On,${new Date().toLocaleString()}\n`;
-  csvContent += `Total Orders Count,${allOrders.length}\n`;
-  
-  const totalRevenue = allOrders.reduce((sum, o) => o.status === 'Delivered' ? sum + Number(o.total) : sum, 0);
-  csvContent += `Total Delivered Revenue (INR),Rs. ${totalRevenue}\n\n`;
-
-  csvContent += "Order ID,Customer Name,Mobile,Email,Delivery Address,Ordered Items,Amount (INR),Payment Mode,Status,Rider Name,Order Date\n";
-
-  allOrders.forEach(ord => {
-    let row = [
-      ord.id,
-      `"${ord.customerName || ''}"`,
-      ord.customerMobile || '',
-      ord.customerEmail || '',
-      `"${(ord.address || '').replace(/"/g, '""')}"`,
-      `"${(ord.items || '').replace(/"/g, '""')}"`,
-      ord.total || 0,
-      ord.paymentMode || 'COD',
-      ord.status || 'Pending',
-      `"${ord.riderName || 'Unassigned'}"`,
-      `"${new Date(ord.date || Date.now()).toLocaleString()}"`
-    ];
-    csvContent += row.join(",") + "\n";
-  });
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `ZipDash_Master_Orders_Report_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  
-  showAdminToast("📊 Excel report updated with all records successfully!");
+ZD.watchProducts(l => { inventory = l; renderAdminPanel(); });
+ZD.watchOrders(o => { ORDERS = o; renderLiveOrders(); try { renderReports(); } catch (e) {} });
+</script>
+<button onclick="document.getElementById('zdSet').style.display='flex'" style="position:fixed;right:14px;bottom:14px;z-index:40;background:#1b4332;color:#fff;border:0;border-radius:999px;padding:12px 16px;font-weight:700;font-size:13px">⚙️ Store settings</button>
+<div id="zdSet" style="display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px"><div style="background:#fff;border-radius:16px;padding:18px;width:100%;max-width:360px;font:13px system-ui">
+<b style="font-size:15px">Store settings</b><p style="color:#78716c;margin:6px 0 10px">Tap the button while standing at your store.</p>
+<button onclick="zdLoc()" style="width:100%;padding:9px;border:1px solid #1b4332;border-radius:10px;background:#ecfdf5;font-weight:700">📍 Use my current location as store</button>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+<label>Latitude<input id="sLat" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:7px"></label><label>Longitude<input id="sLng" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:7px"></label>
+<label>Radius (km)<input id="sRad" type="number" step="0.5" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:7px"></label><label>Delivery fee ₹<input id="sFee" type="number" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:7px"></label>
+<label style="grid-column:span 2">Free delivery above ₹<input id="sFree" type="number" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:7px"></label></div>
+<div style="display:flex;gap:8px;margin-top:14px"><button onclick="zdSave()" style="flex:1;padding:10px;border:0;border-radius:10px;background:#1b4332;color:#fff;font-weight:700">Save</button><button onclick="document.getElementById('zdSet').style.display='none'" style="flex:1;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fff">Close</button></div></div></div>
+<div id="zdPin" style="position:fixed;inset:0;z-index:100;background:#fcfbf9;display:flex;align-items:center;justify-content:center;padding:20px"><div style="width:100%;max-width:300px;text-align:center;font:14px system-ui">
+<b style="font-size:18px;color:#1b4332">ZipDash Admin</b><p id="zdPinMsg" style="color:#78716c;margin:8px 0">Loading…</p>
+<input id="zdPinIn" type="password" inputmode="numeric" placeholder="PIN" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:10px;text-align:center;font-size:18px"><button onclick="zdPinGo()" style="width:100%;margin-top:10px;padding:11px;border:0;border-radius:10px;background:#1b4332;color:#fff;font-weight:700">Continue</button></div></div>
+<script>
+let ZS = null;
+const escA = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+function fillCatSelects() {
+  const cs = ZS.categories || [], cn = ZS.containers || [], cc = newItemCategory.value, ct = newItemContainer.value;
+  newItemCategory.innerHTML = cs.map(c => `<option value="${escA(c.name)}">${escA(c.name)}</option>`).join('') + '<option value="__new__">➕ Add new category…</option>';
+  newItemContainer.innerHTML = '<option value="">— none —</option>' + cn.map(c => `<option value="${escA(c)}">${escA(c)}</option>`).join('') + '<option value="__new__">➕ Add new container type…</option>';
+  newItemCategory.value = cc; if (newItemCategory.selectedIndex < 0) newItemCategory.selectedIndex = 0;
+  newItemContainer.value = ct; if (newItemContainer.selectedIndex < 0) newItemContainer.selectedIndex = 0;
+  zdGroups.innerHTML = [...new Set(cs.map(c => c.group))].map(g => `<option value="${escA(g)}">`).join('');
 }
-
-renderAdminPanel();
+const zdSha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('zd:' + s)))].map(x => x.toString(16).padStart(2, '0')).join('');
+ZD.watchSettings(s => {
+  const first = !ZS; ZS = s;
+  fillCatSelects();
+  if (first) {
+    if (sessionStorage.getItem('zd_ok') === '1') document.getElementById('zdPin').style.display = 'none';
+    else document.getElementById('zdPinMsg').innerText = s.pinHash ? 'Enter your admin PIN' : 'First time: choose an admin PIN (4+ digits)';
+  }
+  if (document.getElementById('zdSet').style.display === 'none') { sLat.value = s.lat ?? ''; sLng.value = s.lng ?? ''; sRad.value = s.radiusKm; sFee.value = s.deliveryFee; sFree.value = s.freeAbove; }
+});
+async function zdPinGo() {
+  const v = zdPinIn.value.trim(); if (!ZS) return; if (v.length < 4) { alert('PIN must be at least 4 digits.'); return; }
+  const h = await zdSha(v);
+  if (!ZS.pinHash) await ZD.saveSettings({ pinHash: h }); else if (ZS.pinHash !== h) { alert('Wrong PIN.'); return; }
+  sessionStorage.setItem('zd_ok', '1'); document.getElementById('zdPin').style.display = 'none';
+}
+function zdLoc() { navigator.geolocation.getCurrentPosition(p => { sLat.value = p.coords.latitude.toFixed(6); sLng.value = p.coords.longitude.toFixed(6); }, () => alert('Could not get location. Allow location access or type the coordinates.'), { enableHighAccuracy: true, timeout: 12000 }); }
+async function zdSave() {
+  const n = x => x.value === '' ? null : Number(x.value);
+  await ZD.saveSettings({ lat: n(sLat), lng: n(sLng), radiusKm: n(sRad) || 3, deliveryFee: n(sFee) ?? 20, freeAbove: n(sFree) ?? 100 });
+  document.getElementById('zdSet').style.display = 'none'; showAdminToast('Store settings saved');
+}
+</script>
+<button onclick="zdCatOpen()" style="position:fixed;right:14px;bottom:62px;z-index:40;background:#d4a373;color:#1b4332;border:0;border-radius:999px;padding:12px 16px;font-weight:700;font-size:13px">🗂 Categories</button>
+<div id="zdCat" style="display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px"><div style="background:#fff;border-radius:16px;padding:16px;width:100%;max-width:420px;max-height:85vh;overflow:auto;font:13px system-ui">
+<b style="font-size:15px">Manage categories</b><p style="color:#78716c;margin:6px 0 10px">Renaming also updates the products in that category. A category can be deleted only when it has no products.</p>
+<div id="zdCatList"></div><button onclick="document.getElementById('zdCat').style.display='none'" style="width:100%;margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fff">Close</button></div></div>
+<script>
+const zdIn = 'border:1px solid #ddd;border-radius:8px;padding:6px;width:100%;box-sizing:border-box';
+function zdCatOpen() {
+  const cs = ZS.categories || [];
+  document.getElementById('zdCatList').innerHTML = cs.map((c, i) => `<div style="border:1px solid #eee;border-radius:12px;padding:8px;margin-bottom:8px">
+    <div style="display:flex;gap:6px"><input id="ci${i}" value="${escA(c.icon || '🛒')}" style="${zdIn};max-width:56px"><input id="cn${i}" value="${escA(c.name)}" style="${zdIn}"></div>
+    <input id="cg${i}" value="${escA(c.group || 'Other')}" list="zdGroups" style="${zdIn};margin-top:6px">
+    <div style="display:flex;gap:6px;margin-top:6px"><button onclick="zdCatSave(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#1b4332;color:#fff;font-weight:700">Save</button><button onclick="zdCatDel(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#fff1f2;color:#9f1239;font-weight:700">Delete</button></div></div>`).join('');
+  document.getElementById('zdCat').style.display = 'flex';
+}
+async function zdCatSave(i) {
+  const cs = ZS.categories.map(c => ({ ...c })), old = cs[i].name;
+  const name = document.getElementById('cn' + i).value.trim(); if (!name) { alert('Category name cannot be empty.'); return; }
+  if (cs.some((c, j) => j !== i && c.name.toLowerCase() === name.toLowerCase())) { alert('Another category already has this name.'); return; }
+  cs[i] = { name, group: document.getElementById('cg' + i).value.trim() || 'Other', icon: document.getElementById('ci' + i).value.trim() || '🛒' };
+  if (name !== old) await ZD.mutateProducts(l => l.forEach(p => { if (p.category === old) p.category = name; }));
+  await ZD.saveSettings({ categories: cs }); showAdminToast('Category saved'); setTimeout(zdCatOpen, 300);
+}
+async function zdCatDel(i) {
+  const cs = ZS.categories, name = cs[i].name, n = inventory.filter(p => p.category === name).length;
+  if (cs.length <= 1) { alert('You need at least one category.'); return; }
+  if (n) { alert(`"${name}" still has ${n} product(s). Move them to another category (Edit product) or delete them first.`); return; }
+  if (!confirm(`Delete category "${name}"?`)) return;
+  await ZD.saveSettings({ categories: cs.filter((c, j) => j !== i) }); showAdminToast('Category deleted'); setTimeout(zdCatOpen, 300);
+}
 </script>
 </body>
 </html>
