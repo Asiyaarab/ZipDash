@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZipDash Rider</title>
+<style>body{font:14px system-ui;margin:0;background:#fcfbf9;color:#292524}.w{max-width:440px;margin:auto;padding:14px}.c{background:#fff;border:1px solid #e6e2dd;border-radius:14px;padding:12px;margin-bottom:10px}
+button,a.b{display:block;width:100%;box-sizing:border-box;text-align:center;padding:12px;border:0;border-radius:12px;background:#1b4332;color:#fff;font:700 14px system-ui;margin-top:8px;text-decoration:none}
+.g{background:#e7e5e4;color:#292524}.r{background:#be123c}#cb{height:110px;overflow:auto;border:1px solid #e6e2dd;border-radius:10px;padding:6px;font-size:12px}#cb p{margin:3px 0}input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ddd;border-radius:10px;margin-top:6px}</style></head>
+<body><div class="w"><h2 style="color:#1b4332;margin:4px 0 10px">🛵 ZipDash Rider</h2><div id="msg" class="c">Loading order…</div>
+<div id="app" style="display:none"><div class="c"><b id="oid"></b> <span id="st" style="float:right"></span><p id="cust"></p><p id="addr"></p><p id="items" style="color:#78716c"></p><p id="pay" style="font-weight:700"></p>
+<a class="b g" id="call">📞 Call customer</a><a class="b g" id="maps" target="_blank">🗺 Open in Google Maps</a></div>
+<div class="c"><button id="sh" onclick="share()">▶ Start sharing my location</button><p style="color:#78716c;font-size:12px;margin:6px 0 0">Keep this page open while delivering so the customer can see you on the map.</p><button class="r" id="dv" onclick="done()">✅ Mark delivered</button></div>
+<div class="c"><b>Chat with customer / store</b><div id="cb"></div><input id="ci" placeholder="Type message…"><button onclick="send()">Send</button></div></div></div>
+<script src="zipdash-db.js"></script>
+<script>
+const id = new URLSearchParams(location.search).get('o'); let o = null, wid = null, last = 0, h = '';
+const $ = x => document.getElementById(x), esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const fail = m => { $('msg').style.display = 'block'; $('app').style.display = 'none'; $('msg').innerText = m; };
+window.onerror = (m) => fail('Something went wrong: ' + m);
+if (typeof ZD === 'undefined') fail('The file zipdash-db.js is missing next to rider.html on your website. Upload it and reload.');
+else if (!id) fail('Invalid link. Ask the store to send the rider link again.');
+else if (!window.ZD_CLOUD) fail('Firebase is not connected yet, so this phone cannot see the order. The store must add the Firebase config in zipdash-db.js.');
+else { ZD.watchOrder(id, x => { o = x; render(); }); setTimeout(() => { if (!o) fail('Order not found. Check your internet or ask the store for a new link.'); }, 10000); }
+function render() {
+  if (!o) { $('msg').innerText = 'Order not found.'; $('app').style.display = 'none'; return; }
+  $('msg').style.display = 'none'; $('app').style.display = 'block';
+  const fin = o.status === 'Delivered' || o.status === 'Cancelled';
+  if (fin && wid != null) { navigator.geolocation.clearWatch(wid); wid = null; $('sh').innerText = '▶ Start sharing my location'; }
+  $('oid').innerText = o.id; $('st').innerText = o.status; $('cust').innerText = '👤 ' + o.customerName + ' (' + o.customerMobile + ')'; $('addr').innerText = '📍 ' + o.address; $('items').innerText = o.items;
+  $('pay').innerText = o.paymentMode === 'Online' && o.paymentStatus === 'Paid' ? '✅ Already paid online' : o.paymentMode === 'Online' ? '⏳ Online payment pending - confirm with store' : '💵 Collect ₹' + o.total + ' in cash';
+  $('call').href = 'tel:' + o.customerMobile;
+  $('maps').href = 'https://www.google.com/maps/search/?api=1&query=' + (o.customerLat != null ? o.customerLat + ',' + o.customerLng : encodeURIComponent(o.address));
+  $('sh').style.display = $('dv').style.display = fin ? 'none' : 'block';
+  const msgs = o.chat || [], k = JSON.stringify(msgs);
+  if (k !== h) { h = k; $('cb').innerHTML = msgs.map(m => `<p style="text-align:${m.from === 'r' ? 'right' : 'left'}"><b>${m.from === 'c' ? 'Customer' : m.from === 'r' ? 'You' : 'Store'}:</b> ${esc(m.t)}</p>`).join('') || '<p style="color:#a8a29e">No messages yet.</p>'; $('cb').scrollTop = 9e9; }
+}
+function share() {
+  if (wid != null) { navigator.geolocation.clearWatch(wid); wid = null; $('sh').innerText = '▶ Start sharing my location'; return; }
+  wid = navigator.geolocation.watchPosition(p => { const n = Date.now(); if (n - last < 10000) return; last = n; ZD.updateOrder(id, { riderLat: p.coords.latitude, riderLng: p.coords.longitude, riderAt: n }); },
+    () => alert('Please allow location access for this page.'), { enableHighAccuracy: true });
+  $('sh').innerText = '⏹ Sharing live location… tap to stop';
+}
+function done() { if (confirm('Mark this order as delivered?')) ZD.updateOrder(id, { status: 'Delivered', paymentStatus: o.paymentMode === 'Online' ? o.paymentStatus : 'Paid' }); }
+function send() { const t = $('ci').value.trim(); if (t) { ZD.addChat(id, { from: 'r', t, at: Date.now() }); $('ci').value = ''; } }
+</script></body></html>
