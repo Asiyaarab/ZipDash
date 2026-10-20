@@ -45,6 +45,30 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 .zd-cimg{background:#f3f2ef;border-radius:.9rem;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:1.9rem;transition:.15s}
 .zd-ctile:active .zd-cimg{transform:scale(.95)}
 .zd-ctile span{display:block;margin-top:.3rem;font-size:.66rem;font-weight:600;color:#44403c;line-height:1.2}
+.zd-catgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;margin-bottom:1rem}
+.zd-cc{text-align:center;cursor:pointer}
+.zd-ci{max-width:88px;margin:0 auto;aspect-ratio:1/1;background:#f3f2ef;border-radius:.9rem;display:flex;align-items:center;justify-content:center;font-size:1.8rem;overflow:hidden;padding:.35rem;box-sizing:border-box;border:2px solid transparent}
+.zd-cc.on .zd-ci{border-color:#1b4332;background:#e7f3ec}
+.zd-cc span{display:block;margin-top:.25rem;font-size:.68rem;font-weight:700;color:#44403c;line-height:1.2}
+.zd-all{background:#1b4332;color:#d4a373}
+.zd-cimg{padding:.35rem;box-sizing:border-box;overflow:hidden}.zd-cimg img,.zd-ci img{width:100%;height:100%;object-fit:contain}
+#homeView{min-height:120vh}
+#cartModal,#addressModal,#paymentModal,#liveTrackingModal{top:0!important;left:0!important;right:0!important;bottom:3.6rem!important;max-width:28rem;margin-left:auto!important;margin-right:auto!important;background:#fcfbf9!important;backdrop-filter:none!important}
+@media(min-width:768px){#cartModal,#addressModal,#paymentModal,#liveTrackingModal{max-width:42rem}}
+#cartModal>div,#addressModal>div,#paymentModal>div{display:block!important;overflow-y:auto;height:100%;box-shadow:none!important;max-width:none!important}
+#cartItemsList{max-height:none!important;overflow:visible!important}
+#addressModalScrollBox{overflow:visible!important}
+#cartModal>div,#addressModal>div,#paymentModal>div{padding-bottom:1.25rem}
+.zd-pg{height:100%;overflow-y:auto;padding:12px;box-sizing:border-box}
+.zd-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.zd-pill{margin-left:auto;background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block}
+.zd-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.zd-step{padding:7px 9px;border-radius:8px;background:#fff;border:1px solid #e6e2dd;color:#78716c;font-size:11px;font-weight:700}
+.zd-step.on{background:#dcfce7;border-color:#bbf7d0;color:#166534}
+.zd-card{background:#fff;border:1px solid #e6e2dd;border-radius:14px;padding:12px;margin-bottom:10px;font-size:12px}
+.zd-card .t,.t{color:#78716c;font-size:12px}
+.zd-btn{display:block;width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid #e6e2dd;background:#fff;font-weight:700;font-size:13px;margin-top:8px;text-align:center;cursor:pointer}
+.zd-danger{color:#be123c;border-color:#fecdd3;background:#fff1f2}
 </style>
 </head>
 <body class="bg-[#fcfbf9] min-h-screen flex flex-col selection:bg-[#1b4332] selection:text-white pb-24">
@@ -59,16 +83,8 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
   <div class="absolute bottom-12 text-stone-300 text-xs tracking-widest uppercase animate-pulse font-bold">Zooming to your street... ⚡</div>
 </div>
 
-<div id="voiceModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-  <div class="bg-white rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl border border-[#e6e2dd]">
-    <div class="w-16 h-16 bg-emerald-100 text-[#1b4332] rounded-full flex items-center justify-center mx-auto text-2xl animate-bounce"><i class="fa-solid fa-microphone"></i></div>
-    <div><h3 class="font-extrabold text-base text-[#1b4332]">Listening...</h3><p id="voiceTranscript" class="text-xs text-stone-500 mt-1">Speak now (e.g., "Milk" or "Momos")</p></div>
-    <button onclick="closeVoiceModal()" class="w-full bg-stone-100 text-stone-700 py-2.5 rounded-xl font-bold text-xs hover:bg-stone-200 transition">Cancel</button>
-  </div>
-</div>
-
 <!-- Customer Login Modal -->
-<div id="customerLoginModal" class="fixed inset-0 bg-stone-900/90 z-40 flex items-center justify-center p-4 hidden">
+<div id="customerLoginModal" class="fixed inset-0 bg-[#fcfbf9] z-40 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl p-6 max-w-xs w-full space-y-4 shadow-2xl border border-[#e6e2dd]">
     <div class="text-center space-y-1">
       <div class="w-12 h-12 bg-[#1b4332] text-[#d4a373] rounded-xl flex items-center justify-center mx-auto text-xl font-bold"><i class="fa-solid fa-user-circle"></i></div>
@@ -77,32 +93,17 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
     </div>
     <div class="space-y-3 text-xs pt-2">
       <div>
-        <input type="tel" id="custLoginPhone" placeholder="Phone Number *" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]" oninput="clearLoginError()">
+        <input type="tel" id="custLoginPhone" enterkeyhint="go" placeholder="Phone Number *" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]" oninput="clearLoginError()">
         <p id="custLoginPhoneError" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p>
       </div>
-      <input type="text" id="custLoginName" placeholder="Your Name (Optional)" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]">
-      <input type="email" id="custLoginInput" placeholder="Email ID (Optional)" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]">
+      <div><input type="text" id="custLoginName" enterkeyhint="go" placeholder="Your Name *" oninput="clearLoginError()" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]"><p id="custLoginNameError" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p></div>
+      <input type="email" id="custLoginInput" enterkeyhint="go" placeholder="Email ID (Optional)" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3.5 py-3 focus:outline-none focus:border-[#1b4332]">
       <button onclick="handleSmartLogin()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold hover:bg-[#143225] transition shadow-md">Continue</button>
     </div>
   </div>
 </div>
 
-<div id="heartBoxModal" class="fixed inset-0 bg-black/80 z-40 hidden flex items-center justify-center p-4 backdrop-blur-md">
-  <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl border-2 border-[#1b4332]">
-    <div class="w-20 h-20 bg-[#1b4332] text-[#d4a373] rounded-2xl flex items-center justify-center mx-auto text-3xl shadow-lg animate-bounce-slow"><i class="fa-solid fa-heart text-rose-500"></i></div>
-    <div>
-      <span class="bg-emerald-100 text-emerald-900 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">Order Placed Successfully! 🎉</span>
-      <h3 class="font-extrabold text-base text-[#1b4332] mt-2">A Special Box Opened For You!</h3>
-    </div>
-    <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 shadow-inner">
-      <p id="uniqueQuoteText" class="text-xs font-bold text-stone-900 leading-relaxed"></p>
-      <p class="text-[10px] text-emerald-800 font-semibold mt-2">⚡ Redirecting to live tracking in <span id="countdownTimer">5</span>s...</p>
-    </div>
-    <button onclick="closeHeartBoxAndTrack()" class="w-full bg-[#1b4332] text-white py-3 rounded-xl font-bold text-xs hover:bg-[#143225] transition shadow-md flex items-center justify-center gap-2"><span>View Live Order Tracking Now ⚡</span></button>
-  </div>
-</div>
-
-<header class="sticky top-0 z-30 bg-[#fcfbf9]/90 backdrop-blur-md border-b border-[#e6e2dd] px-4 py-3">
+<header class="relative z-30 bg-[#fcfbf9]/90 backdrop-blur-md border-b border-[#e6e2dd] px-4 py-3">
   <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
     <div class="flex items-center space-x-2">
       <div class="w-9 h-9 rounded-xl bg-[#1b4332] flex items-center justify-center text-white font-bold text-lg shadow-sm"><i class="fa-solid fa-bolt text-[#d4a373]"></i></div>
@@ -134,10 +135,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
   </div>
 </div>
 
-<div id="cancelledOrderBanner" class="fixed top-0 left-0 right-0 z-50 max-w-md mx-auto bg-rose-600 text-white text-xs py-3 px-4 text-center font-bold shadow-md hidden items-center justify-center gap-2">
-  <i class="fa-solid fa-circle-xmark text-sm"></i>
-  <span id="cancelledOrderText">Your order has been cancelled successfully.</span>
-</div>
+<div id="zdBanner" style="display:none;position:fixed;top:8px;left:8px;right:8px;margin:0 auto;max-width:28rem;z-index:90;background:#d4a373;color:#1b4332;font-weight:700;font-size:12px;padding:11px 14px;border-radius:12px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.18)"></div>
 
 <div class="bg-[#1b4332] text-white text-xs py-2 px-4 text-center font-bold shadow-inner flex items-center justify-center gap-2 border-b border-[#143225]">
   <i class="fa-solid fa-gift text-[#d4a373]"></i><span>Unlock FREE Delivery on orders above ₹100!</span>
@@ -171,15 +169,9 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
       </div>
       <div class="absolute -right-4 -bottom-6 text-white/10 text-7xl font-black">⚡</div>
     </div>
-    <div class="flex space-x-2 overflow-x-auto hide-scrollbar mb-4 pb-1">
-      <span id="catChips" style="display:contents"><button onclick="filterCategory('all')" id="cat-all" class="cat-btn bg-[#1b4332] text-white text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">All items</button>
-      <button onclick="filterCategory('Snacks & Instant')" id="cat-Snacks & Instant" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Snacks & instant</button>
-      <button onclick="filterCategory('Drinks & Beverages')" id="cat-Drinks & Beverages" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Drinks & beverages</button>
-      <button onclick="filterCategory('Dairy & Breakfast')" id="cat-Dairy & Breakfast" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Dairy & breakfast</button>
-      <button onclick="filterCategory('Biscuits & Chocolates')" id="cat-Biscuits & Chocolates" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Biscuits & chocolates</button></span>
-      <button onclick="filterCategory('Atta & Rice & Daal')" id="cat-Atta & Rice & Daal" class="cat-btn bg-white text-stone-600 border border-[#e6e2dd] text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap shadow-sm transition">Atta & rice & daal</button>
-    </div>
-    <div class="flex items-center justify-between mb-3">
+    <div id="activeCatBar" style="display:none;align-items:center;justify-content:space-between;background:#e7f3ec;border-radius:10px;padding:6px 10px;margin-bottom:10px;font-size:12px;font-weight:700;color:#1b4332"><span id="activeCatLabel"></span><button onclick="filterCategory('all',true)" style="border:0;background:none;color:#be123c;font-weight:800">Clear ✕</button></div>
+    <div id="catFilterGrid" class="zd-catgrid"></div>
+    <div id="resultsHead" class="flex items-center justify-between mb-3">
       <h3 class="font-extrabold text-sm text-[#1b4332] flex items-center gap-1.5"><span>🔥 Trending Essentials in Your Area</span></h3>
       <span id="productCountLabel" class="text-xs text-stone-500 font-medium">0 items</span>
     </div>
@@ -188,9 +180,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 
   <!-- Dedicated Item Detail Page View -->
   <div id="itemPageView" class="hidden space-y-4 pb-16">
-    <button onclick="backToHomeView()" class="bg-white border border-[#e6e2dd] hover:bg-stone-100 text-stone-700 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm w-fit">
-      <i class="fa-solid fa-arrow-left"></i> Back to Home
-    </button>
+    
 
     <div id="itemPageContent" class="bg-white border border-[#e6e2dd] rounded-3xl p-5 shadow-sm space-y-4"></div>
 
@@ -248,8 +238,12 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
         <div onclick="openWishlistPage()" class="px-6 py-4 flex items-center cursor-pointer hover:bg-stone-50 transition">
           <span class="font-bold text-stone-800 text-sm">My Wishlist</span>
         </div>
-        <div onclick="logoutCustomer()" class="px-6 py-4 flex items-center cursor-pointer hover:bg-stone-50 transition">
+        <div id="signOutRow" onclick="askSignOut()" class="px-6 py-4 flex items-center cursor-pointer hover:bg-stone-50 transition">
           <span class="font-bold text-rose-600 text-sm">Sign Out</span>
+        </div>
+        <div id="signOutConfirm" style="display:none;padding:14px 24px;background:#fff1f2">
+          <p style="font-weight:700;color:#292524;margin:0 0 8px">Sign out of ZipDash?</p>
+          <div style="display:flex;gap:8px"><button onclick="cancelSignOut()" style="flex:1;padding:10px;border-radius:10px;border:1px solid #e6e2dd;background:#fff;font-weight:700">Cancel</button><button onclick="logoutCustomer()" style="flex:1;padding:10px;border-radius:10px;border:0;background:#be123c;color:#fff;font-weight:700">Sure, sign out</button></div>
         </div>
       </div>
     </div>
@@ -293,51 +287,49 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
   <button id="detailBarAddBtn" onclick="" class="bg-[#d4a373] hover:bg-[#c29265] text-[#1b4332] font-black px-8 py-3 rounded-2xl shadow-md text-sm transition">Add to Cart</button>
 </div>
 
-<div id="liveTrackingModal" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-3xl p-5 max-w-lg w-full space-y-4 shadow-2xl border border-[#e6e2dd] max-h-[90vh] overflow-y-auto">
-    <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span><h3 class="font-extrabold text-sm text-[#1b4332]">Live Order Tracking & Partner Details</h3></div>
-      <button onclick="closeLiveTracking()" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-lg"></i></button>
-    </div>
-    <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-2 text-xs">
-      <div class="flex justify-between font-extrabold text-[#1b4332]"><span id="modalOrderIdText">Order ID: #---</span><span id="modalOrderStatusText" class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">Status: Pending</span></div>
-      <div class="text-stone-700 border-t border-emerald-100/60 pt-2"><p class="font-bold text-[11px] text-stone-900 mb-0.5">🛒 Ordered Items:</p><p id="modalOrderItemsText" class="text-stone-600 text-[11px]">Loading items...</p></div>
-      <div class="flex justify-between text-stone-700 border-t border-emerald-100/60 pt-2 font-bold"><span>Delivery Address:</span><span id="modalOrderAddressText" class="text-right text-stone-600 font-medium truncate max-w-[200px]">---</span></div>
-      <div class="flex justify-between text-[#1b4332] font-extrabold pt-1 border-t border-emerald-100/60"><span>Total Amount Paid:</span><span id="modalOrderTotalText">₹0</span></div>
-    </div>
-    <div id="payNowWrap" class="hidden"><a id="payNowBtn" href="#" class="block w-full bg-[#d4a373] hover:bg-[#c29265] text-[#1b4332] py-3 rounded-xl font-extrabold text-xs text-center transition"><i class="fa-solid fa-mobile-screen"></i> <span id="payNowText">Pay via UPI</span></a></div>
-    <div class="w-full h-32 rounded-2xl overflow-hidden border border-[#e6e2dd] shadow-inner relative bg-emerald-50">
-      <iframe id="liveMapFrame" width="100%" height="100%" frameborder="0" scrolling="no" src="https://maps.google.com/maps?q=Mumbai&t=&z=14&ie=UTF8&iwloc=&output=embed" class="w-full h-full"></iframe>
-      <div class="absolute bottom-2 left-2 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-[#1b4332] shadow">📍 Area-wise GPS Tracking Active</div>
-    </div>
-    <div id="riderInfoCard" class="bg-stone-50 border border-[#e6e2dd] rounded-2xl p-3.5 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 bg-[#1b4332] text-[#d4a373] rounded-2xl flex items-center justify-center text-lg font-bold shadow"><i class="fa-solid fa-motorcycle"></i></div>
-        <div>
-          <span id="riderStatusBadge" class="text-[9px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded">Delivery partner will be assigned</span>
-          <h4 id="riderNameText" class="font-bold text-xs text-stone-800 mt-1">Waiting for assignment...</h4>
-          <p id="riderPhoneText" class="text-[10px] text-stone-500">📞 Store team is reviewing order</p>
-        </div>
+<div id="liveTrackingModal" class="fixed inset-0 z-40 hidden">
+  <div class="zd-pg">
+    <div class="zd-hd"><button onclick="closeLiveTracking()" aria-label="Back" style="border:0;background:none;font-size:18px"><i class="fa-solid fa-arrow-left"></i></button><b id="modalOrderIdText" style="font-size:15px">Track order</b><span id="modalOrderStatusText" class="zd-pill">Waiting for rider</span></div>
+    <div class="zd-steps"><div id="tsPlaced" class="zd-step">✓ Order placed</div><div id="tsRider" class="zd-step">Rider assigned</div><div id="tsOut" class="zd-step">Out for delivery</div><div id="tsDone" class="zd-step">Delivered</div></div>
+    <div id="payNowWrap" class="hidden" style="margin-bottom:10px"><a id="payNowBtn" href="#" class="zd-btn" style="background:#d4a373;color:#1b4332;border:0;text-decoration:none"><span id="payNowText"></span></a></div>
+    <div class="zd-card" style="padding:0;overflow:hidden">
+      <div style="position:relative;height:270px;background:#f3f2ef">
+        <div id="liveMap" style="position:absolute;inset:0"></div>
+        <div id="mapEmpty" style="position:absolute;inset:0;z-index:500;background:#f3f2ef;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#78716c;text-align:center;padding:12px"><i class="fa-solid fa-map-location-dot" style="font-size:26px;margin-bottom:6px"></i><span>The live map opens here automatically once a rider is assigned</span></div>
       </div>
-      <a id="riderCallBtn" href="#" class="bg-emerald-600 hover:bg-emerald-700 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow transition hidden" title="Call Partner"><i class="fa-solid fa-phone text-xs"></i></a>
+      <div style="padding:8px 12px;font-size:12px;font-weight:700;color:#1b4332" id="mapLabel">Rider location not shared yet</div>
     </div>
-    <div class="bg-stone-50 border border-[#e6e2dd] rounded-2xl p-3 space-y-2">
-      <p class="text-[10px] font-bold text-stone-500 uppercase flex items-center gap-1"><i class="fa-solid fa-comments text-[#1b4332]"></i> Chat with Delivery Partner</p>
-      <div id="chatMessagesBox" class="bg-white border border-[#e6e2dd] rounded-xl p-2.5 h-16 overflow-y-auto space-y-1.5 text-xs text-stone-700">
-        <div class="bg-emerald-50 text-[#1b4332] p-2 rounded-xl text-[11px] w-fit max-w-[85%] font-medium">👋 Hello! Your order is being processed. Once assigned, your rider will message here.</div>
-      </div>
-      <div class="flex gap-2">
-        <input type="text" id="chatInput" placeholder="Type message..." class="flex-grow bg-white border border-[#e6e2dd] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#1b4332]">
-        <button onclick="sendChatMessage()" class="bg-[#1b4332] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#143225] transition">Send</button>
-      </div>
+    <div class="zd-card" id="riderInfoCard">
+      <div class="t">Delivery partner</div>
+      <span id="riderStatusBadge" class="zd-pill" style="margin:0">Waiting for a rider</span>
+      <div id="riderNameText" style="font-weight:800;font-size:14px;margin-top:4px">Waiting for assignment…</div>
+      <div id="riderPhoneText" class="t"></div><div id="riderEmailText" class="t"></div>
+      <a id="riderCallBtn" href="#" class="zd-btn" style="display:none;text-decoration:none;background:#1b4332;color:#fff;border:0"><i class="fa-solid fa-phone"></i> Call rider</a>
     </div>
-    <button id="cancelOrderBtn" onclick="cancelActiveOrder()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 rounded-xl font-bold text-xs transition border border-rose-200 flex items-center justify-center gap-1.5"><i class="fa-solid fa-ban"></i> Cancel Order</button>
+    <div class="zd-card">
+      <div style="display:flex;justify-content:space-between"><b>Invoice</b><span class="t" id="invPlaced"></span></div>
+      <div id="invCust" style="margin-top:6px;font-weight:700"></div><div id="invMobile"></div><div id="invEmail" class="t"></div><div id="invAddr" class="t"></div>
+      <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12px"><thead><tr class="t"><td style="padding:4px 0">Item</td><td style="text-align:center">Qty</td><td style="text-align:right">Price</td></tr></thead><tbody id="invItems"></tbody></table>
+      <div id="invTotals" style="border-top:1px solid #e6e2dd;margin-top:6px;padding-top:6px"></div>
+      <div id="invPay" class="t" style="margin-top:6px"></div>
+    </div>
+    <div class="zd-card">
+      <b>Chat with delivery partner</b>
+      <div id="chatMessagesBox" style="height:7rem;overflow-y:auto;border:1px solid #e6e2dd;border-radius:10px;padding:6px;margin-top:6px"></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="chatInput" placeholder="Type message…" style="flex:1;border:1px solid #e6e2dd;border-radius:10px;padding:9px;font-size:13px"><button onclick="sendChatMessage()" style="border:0;background:#1b4332;color:#fff;border-radius:10px;padding:0 16px;font-weight:700">Send</button></div>
+    </div>
+    <button id="cancelOrderBtn" onclick="askCancel()" class="zd-btn zd-danger"><i class="fa-solid fa-ban"></i> Cancel order</button>
+    <div id="cancelConfirm" style="display:none">
+      <div class="zd-card" style="background:#fff1f2;border-color:#fecdd3;color:#9f1239;font-weight:700">Cancel this order? Stock is returned and the rider is told.</div>
+      <div style="display:flex;gap:8px"><button onclick="keepOrder()" class="zd-btn" style="margin-top:0">Keep order</button><button onclick="cancelActiveOrder()" class="zd-btn zd-danger" style="margin-top:0">Yes, cancel</button></div>
+    </div>
+    <div style="height:12px"></div>
   </div>
 </div>
 
 <nav class="fixed bottom-0 left-0 right-0 bg-[#1b4332] border-t border-[#143225] py-2 px-3 z-30 max-w-md md:max-w-4xl mx-auto shadow-2xl">
   <div class="flex justify-around items-center text-emerald-100">
-    <a href="#" data-tab="home" onclick="backToHomeView(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] font-extrabold uppercase tracking-wider text-[9px] transition"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" stroke-width="1.8"/><path d="M8.8 11.6h6.4l-6.4 6.6h6.4" stroke-width="2"/></svg><span>Home</span></a>
+    <a href="#" data-tab="home" onclick="goHomeFresh(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] font-extrabold uppercase tracking-wider text-[9px] transition"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" stroke-width="1.8"/><path d="M8.8 11.6h6.4l-6.4 6.6h6.4" stroke-width="2"/></svg><span>Home</span></a>
     <a href="#" data-tab="categories" onclick="openCategoriesPage(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] font-extrabold uppercase tracking-wider text-[9px] transition"><i class="fa-solid fa-grip text-base" style="height:24px;line-height:24px"></i><span>Categories</span></a>
     <a href="#offers" data-tab="offers" onclick="openOffersPage(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] font-extrabold uppercase tracking-wider text-[9px] transition"><i class="fa-solid fa-tags text-base" style="height:24px;line-height:24px"></i><span>Offers</span></a>
     <a href="cart.html" onclick="toggleCart(); return false;" class="flex flex-col items-center gap-1 text-[#d4a373] font-extrabold uppercase tracking-wider text-[9px] relative transition">
@@ -356,6 +348,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
     </div>
     <div id="cartDeliveryNotice" class="bg-amber-50 border-b border-amber-200 p-3 text-xs text-amber-800 font-medium text-center"></div>
     <div id="cartItemsList" class="p-4 overflow-y-auto space-y-3 max-h-[35vh]"></div>
+    <div id="cartCoupons" style="padding:0 16px 10px"></div>
     <div class="px-4 py-2.5 bg-emerald-50 border-t border-b border-emerald-200">
       <h4 class="font-extrabold text-xs text-[#1b4332] mb-2 flex items-center gap-1.5"><i class="fa-solid fa-bolt text-[#d4a373]"></i> Frequently Bought Together (Suggested)</h4>
       <div id="cartSuggestionsList" class="flex gap-2 overflow-x-auto hide-scrollbar pb-1"></div>
@@ -384,6 +377,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
       <button onclick="closeAddressModal()" class="text-emerald-200 hover:text-white text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="addressModalScrollBox" class="p-5 overflow-y-auto space-y-3 flex-grow">
+      <div id="deliveryNote" style="display:none;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:12px;padding:8px 10px;font-size:11px;font-weight:700"></div>
       <div>
         <label class="block font-bold text-stone-700 text-xs mb-1">Full Name *</label>
         <input type="text" id="custNameInput" placeholder="Enter your full name" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custNameInput')">
@@ -391,12 +385,12 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
       </div>
       <div>
         <label class="block font-bold text-stone-700 text-xs mb-1">Mobile Number *</label>
-        <input type="tel" id="custMobileInput" placeholder="Enter 10-digit mobile number" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custMobileInput')">
+        <input type="tel" id="custMobileInput" inputmode="numeric" maxlength="10" placeholder="Enter 10-digit mobile number" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custMobileInput')">
         <p id="err_custMobileInput" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p>
       </div>
       <div>
         <label class="block font-bold text-stone-700 text-xs mb-1">Email ID (Optional)</label>
-        <input type="email" id="custEmailInput" placeholder="Enter email address" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]">
+        <input type="email" id="custEmailInput" placeholder="Enter email address" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custEmailInput')"><p id="err_custEmailInput" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p>
       </div>
       <div>
         <label class="block font-bold text-stone-700 text-xs mb-1">Address / Landmark *</label>
@@ -404,15 +398,19 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
         <p id="err_deliveryAddress" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p>
         <button type="button" onclick="useMyLocation()" id="useLocBtn" class="mt-1 text-[11px] font-bold text-[#1b4332] bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">📍 Use my current location (more accurate)</button>
       </div>
+      <div>
+        <label class="block font-bold text-stone-700 text-xs mb-1">Landmark (Optional)</label>
+        <input type="text" id="custLandmarkInput" placeholder="Near temple, mall, school..." class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]">
+      </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="block font-bold text-stone-700 text-xs mb-1">City *</label>
-          <input type="text" id="custCityInput" placeholder="City" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custCityInput')">
+          <input type="text" id="custCityInput" value="Ahmedabad" placeholder="City" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custCityInput')">
           <p id="err_custCityInput" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p>
         </div>
         <div>
           <label class="block font-bold text-stone-700 text-xs mb-1">Pincode *</label>
-          <input type="text" id="custPincodeInput" placeholder="Pincode" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custPincodeInput')">
+          <input type="text" id="custPincodeInput" inputmode="numeric" maxlength="6" placeholder="6-digit pincode" class="w-full bg-white border border-[#e6e2dd] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#1b4332]" oninput="clearFieldError('custPincodeInput')">
           <p id="err_custPincodeInput" class="text-rose-600 text-[10px] mt-1 hidden font-semibold"></p>
         </div>
       </div>
@@ -471,10 +469,11 @@ const UPI_ID = "yourname@oksbi";
 const UPI_PAYEE_NAME = "ZipDash Store";
 const UPI_READY = !UPI_ID.includes("yourname");
 var ZSET = { lat: null, lng: null, radiusKm: 5, deliveryFee: 20, freeAbove: 100, categories: [] }, userPos = null;
+function zdBanner(m, ms) { const b = document.getElementById('zdBanner'); if (!b) return; b.innerText = m; b.style.display = 'block'; clearTimeout(window._zb); window._zb = setTimeout(() => b.style.display = 'none', ms || 3500); }
 function feeFor(sub) { return sub === 0 || sub >= ZSET.freeAbove ? 0 : ZSET.deliveryFee; }
 function distKm(a, b, c, d) { const r = x => x * Math.PI / 180, h = Math.sin(r(c - a) / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(r(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
 async function locateAddress(addr, city, pin) {
-  const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&q=';
+  const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&viewbox=72.35,23.20,72.85,22.85&q=';
   for (const q of [`${addr}, ${city}, ${pin}`, `${addr}, ${city}`, `${pin}, ${city}`, `${pin}`]) {
     try { const r = await fetch(url + encodeURIComponent(q + ', India')).then(x => x.json()); if (r && r[0]) return { lat: +r[0].lat, lng: +r[0].lon }; }
     catch (e) { return 'err'; }
@@ -482,19 +481,20 @@ async function locateAddress(addr, city, pin) {
   return null;
 }
 async function checkServiceable() {
-  if (ZSET.lat == null || ZSET.lng == null) return true; // store location not set yet in admin
+  const storeSet = ZSET.lat != null && ZSET.lng != null;
   const err = document.getElementById('err_deliveryAddress');
-  const show = m => { err.innerText = m; err.classList.remove('hidden'); };
+  const show = m => { err.innerText = m; err.classList.remove('hidden'); document.getElementById('deliveryAddress').classList.add('border-rose-600', 'ring-1', 'ring-rose-600'); err.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
   let pos = addrCoords;
   if (!pos) {
-    show('Checking delivery to your address…');
-    const r = await locateAddress(document.getElementById('deliveryAddress').value.trim(), document.getElementById('custCityInput').value.trim(), document.getElementById('custPincodeInput').value.trim());
-    if (r === 'err') { show('Could not check your address right now. Please check your internet and try again.'); return false; }
-    if (!r) { show("We couldn't find this address. Please check the address and pincode, or use your current location."); return false; }
-    pos = r;
+    show('Checking your address…');
+    const lm = document.getElementById('custLandmarkInput').value.trim();
+    const r = await locateAddress(document.getElementById('deliveryAddress').value.trim() + (lm ? ', ' + lm : ''), document.getElementById('custCityInput').value.trim(), document.getElementById('custPincodeInput').value.trim());
+    if (r === 'err' || !r) {
+      if (storeSet) { show(r === 'err' ? 'Could not check your address right now. Please check your internet and try again.' : "We couldn't find this address. Please check the address and pincode, or use your current location."); return false; }
+    } else pos = r;
   }
-  if (distKm(ZSET.lat, ZSET.lng, pos.lat, pos.lng) > ZSET.radiusKm) { show('Currently not delivered in this location.'); return false; }
-  err.classList.add('hidden'); userPos = pos; return true;
+  if (storeSet && pos && distKm(ZSET.lat, ZSET.lng, pos.lat, pos.lng) > ZSET.radiusKm) { show('Currently not delivered in this location.'); return false; }
+  err.classList.add('hidden'); document.getElementById('deliveryAddress').classList.remove('border-rose-600', 'ring-1', 'ring-rose-600'); userPos = pos; return true;
 }
 function upiPayUrl(amount, orderCode) {
   return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Order ' + orderCode)}`;
@@ -607,6 +607,9 @@ function showHomeView() {
   window.scrollTo(0, 0);
   renderProducts();
 }
+function goHomeFresh() { activeCategory = 'all'; document.getElementById('searchInput').value = ''; try { renderCatUI(); } catch (e) {} backToHomeView(); }
+function askSignOut() { document.getElementById('signOutRow').style.display = 'none'; document.getElementById('signOutConfirm').style.display = 'block'; }
+function cancelSignOut() { document.getElementById('signOutRow').style.display = 'flex'; document.getElementById('signOutConfirm').style.display = 'none'; }
 function backToHomeView() {
   const d = (history.state && history.state.depth) || 0;
   if (d > 0) history.go(-d); else showHomeView();
@@ -646,11 +649,12 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     const splash = document.getElementById('magicalSplash');
     splash.style.opacity = '0';
-    setTimeout(() => splash.remove(), 1000);
-  }, 2000);
+    setTimeout(() => splash.remove(), 600);
+  }, 900);
   const auth = localStorage.getItem('zipdash_customer_auth');
   if (!auth) document.getElementById('customerLoginModal').classList.remove('hidden');
   renderProducts(); updateCartUI();
+  ['custLoginPhone', 'custLoginName', 'custLoginInput'].forEach(i => document.getElementById(i).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleSmartLogin(); } }));
   startProductsWatch();
   watchCurrentOrder(localStorage.getItem('zipdash_current_order_id'));
   startMyOrdersWatch();
@@ -658,24 +662,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function startVoiceOrder() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert("Voice recognition is not supported on this browser."); return; }
+  if (!SR) { zdBanner('Voice search is not supported on this browser.'); return; }
   const rec = new SR();
   rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
-  document.getElementById('voiceModal').classList.remove('hidden');
-  document.getElementById('voiceTranscript').innerText = "Listening... Speak now";
-  try { rec.start(); } catch(e) { closeVoiceModal(); return; }
-  rec.onresult = e => {
-    const t = e.results[0][0].transcript;
-    document.getElementById('voiceTranscript').innerText = `You said: "${t}"`;
-    document.getElementById('searchInput').value = t;
-    filterProducts();
-    setTimeout(closeVoiceModal, 1000);
-  };
-  rec.onerror = () => { document.getElementById('voiceModal').classList.add('hidden'); };
+  try { rec.start(); } catch (e) { return; }
+  zdBanner('🎤 Listening… speak now', 6000);
+  rec.onresult = e => { const t = e.results[0][0].transcript; zdBanner('You said: "' + t + '"'); document.getElementById('searchInput').value = t; filterProducts(); };
+  rec.onerror = () => zdBanner('Could not hear you. Please try again.');
   rec.onspeechend = () => rec.stop();
 }
-function closeVoiceModal(){ document.getElementById('voiceModal').classList.add('hidden'); }
-
+function closeVoiceModal(){}
 function cartSubtotal(){ let s=0; Object.values(cart).forEach(i=>s+=i.price*i.qty); return s; }
 
 // Offers Dedicated Full Page View
@@ -705,74 +701,86 @@ function openOffersPage() {
 
 function copyOfferCode(code, minOrder) {
   const subtotal = cartSubtotal();
-  if (subtotal < minOrder) alert(`Note: Code "${code}" requires a minimum order of ₹${minOrder}.`);
-  else { try { navigator.clipboard.writeText(code); } catch(e){} alert(`Coupon code "${code}" copied!`); }
+  if (subtotal < minOrder) zdBanner(`Note: Code "${code}" requires a minimum order of ₹${minOrder}.`);
+  else { try { navigator.clipboard.writeText(code); } catch(e){} zdBanner(`Coupon code "${code}" copied!`); }
 }
 
 function clearLoginError() {
-  const errEl = document.getElementById('custLoginPhoneError');
-  errEl.innerText = "";
-  errEl.classList.add('hidden');
-  document.getElementById('custLoginPhone').classList.remove('border-rose-600', 'ring-1', 'ring-rose-600');
+  ['custLoginPhone', 'custLoginName'].forEach(i => document.getElementById(i).classList.remove('border-rose-600', 'ring-1', 'ring-rose-600'));
+  ['custLoginPhoneError', 'custLoginNameError'].forEach(i => { const e = document.getElementById(i); e.innerText = ''; e.classList.add('hidden'); });
 }
-
 function handleSmartLogin() {
-  const phoneInput = document.getElementById('custLoginPhone');
-  const phone = phoneInput.value.trim();
-  const name = document.getElementById('custLoginName').value.trim();
+  const pI = document.getElementById('custLoginPhone'), nI = document.getElementById('custLoginName');
+  const phone = pI.value.trim().replace(/\D/g, ''), name = nI.value.trim();
   const email = document.getElementById('custLoginInput').value.trim().toLowerCase();
-  const errEl = document.getElementById('custLoginPhoneError');
-
-  if (!phone || phone.length < 10) {
-    errEl.innerText = "Please enter a valid 10-digit phone number *";
-    errEl.classList.remove('hidden');
-    phoneInput.classList.add('border-rose-600', 'ring-1', 'ring-rose-600');
-    phoneInput.focus();
-    return;
-  }
+  clearLoginError();
+  let bad = null;
+  const mark = (el, errId, msg) => { const e = document.getElementById(errId); e.innerText = msg; e.classList.remove('hidden'); el.classList.add('border-rose-600', 'ring-1', 'ring-rose-600'); if (!bad) bad = el; };
+  if (phone.length < 10) mark(pI, 'custLoginPhoneError', 'Please enter a valid 10-digit phone number *');
+  if (!name) mark(nI, 'custLoginNameError', 'Please enter your name *');
+  if (bad) { bad.scrollIntoView({ behavior: 'smooth', block: 'center' }); bad.focus({ preventScroll: true }); return; }
   localStorage.setItem('zipdash_customer_auth', JSON.stringify({ phone, name, email }));
+  if (document.activeElement) document.activeElement.blur();
   document.getElementById('customerLoginModal').classList.add('hidden');
+  window.scrollTo(0, 0);
+  try { startMyOrdersWatch(); } catch (e) {}
 }
 
+const fmtT = v => { if (!v) return '-'; const d = new Date(v); return isNaN(d) ? '-' : d.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); };
+const cleanEmail = e => (e && e !== 'Not provided') ? e : '';
 function checkActiveOrderStatus() {
-  const cur = currentOrder;
-  if (!cur || cur.status === 'Delivered' || cur.status === 'Cancelled') {
-    document.getElementById('activeOrderBanner').classList.add('hidden');
-    document.getElementById('trackBtnHeader').classList.add('hidden');
-    return;
-  }
-  document.getElementById('activeOrderBanner').classList.remove('hidden');
-  document.getElementById('trackBtnHeader').classList.remove('hidden');
-  document.getElementById('bannerStatusText').innerText = cur.status === 'Out for Delivery' ? 'Out for delivery - arriving soon' : 'Order Placed - Arriving in 15 mins';
-  document.getElementById('modalOrderIdText').innerText = `Order ID: ${cur.id}`;
-  document.getElementById('modalOrderStatusText').innerText = `Status: ${cur.status}`;
-  document.getElementById('modalOrderItemsText').innerText = cur.items;
-  document.getElementById('modalOrderAddressText').innerText = cur.address;
-  document.getElementById('modalOrderTotalText').innerText = `₹${cur.total}`;
-  const hasRider = cur.riderName && cur.riderName.trim() !== "";
+  const cur = currentOrder, live = !!cur && cur.status !== 'Delivered' && cur.status !== 'Cancelled';
+  document.getElementById('activeOrderBanner').classList.toggle('hidden', !live);
+  document.getElementById('trackBtnHeader').classList.toggle('hidden', !live);
+  if (!cur) return;
+  if (cur.status === 'Cancelled') { closeLiveTracking(); return; }
+  if (live) document.getElementById('bannerStatusText').innerText = cur.status === 'Out for Delivery' ? 'Out for delivery - arriving soon' : 'Order Placed - Arriving in 15 mins';
+  if (cur.status === 'Delivered' && window._lastSt !== 'Delivered') zdBanner('✅ Your order was delivered. Enjoy!');
+  window._lastSt = cur.status;
+  renderTracking(cur);
+}
+function renderTracking(cur) {
+  const $ = id => document.getElementById(id);
+  const hasRider = !!(cur.riderName && cur.riderName.trim()), done = cur.status === 'Delivered';
+  $('modalOrderIdText').innerText = 'Track order ' + cur.id;
+  $('modalOrderStatusText').innerText = done ? 'Delivered' : hasRider ? 'Out for delivery' : 'Waiting for rider';
+  const st = (id, on) => $(id).className = 'zd-step' + (on ? ' on' : '');
+  st('tsPlaced', true); st('tsRider', hasRider || done); st('tsOut', cur.status === 'Out for Delivery' || done); st('tsDone', done);
+  // rider
   if (hasRider) {
-    document.getElementById('riderStatusBadge').innerText = "Delivery partner assigned 🛵";
-    document.getElementById('riderStatusBadge').className = "text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded";
-    document.getElementById('riderNameText').innerText = `${cur.riderName} (Rider)`;
-    document.getElementById('riderPhoneText').innerText = `📞 ${cur.riderPhone || 'N/A'}`;
-    document.getElementById('riderCallBtn').href = `tel:${cur.riderPhone}`;
-    document.getElementById('riderCallBtn').classList.remove('hidden');
+    $('riderStatusBadge').innerText = 'Delivery partner assigned'; $('riderStatusBadge').style.background = '#dcfce7'; $('riderStatusBadge').style.color = '#166534';
+    $('riderNameText').innerText = cur.riderName; $('riderPhoneText').innerText = '📞 ' + (cur.riderPhone || '-');
+    $('riderEmailText').innerText = cleanEmail(cur.riderEmail) ? '✉️ ' + cur.riderEmail : '';
+    $('riderCallBtn').href = 'tel:' + cur.riderPhone; $('riderCallBtn').style.display = 'block';
   } else {
-    document.getElementById('riderStatusBadge').innerText = "Delivery partner will be assigned ⏳";
-    document.getElementById('riderStatusBadge').className = "text-[9px] bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded";
-    document.getElementById('riderNameText').innerText = "Waiting for assignment...";
-    document.getElementById('riderPhoneText').innerText = "📞 Store team is reviewing order";
-    document.getElementById('riderCallBtn').classList.add('hidden');
+    $('riderStatusBadge').innerText = 'Waiting for a rider'; $('riderStatusBadge').style.background = '#fef3c7'; $('riderStatusBadge').style.color = '#92400e';
+    $('riderNameText').innerText = 'Waiting for assignment…'; $('riderPhoneText').innerText = 'The store team is arranging your delivery.'; $('riderEmailText').innerText = ''; $('riderCallBtn').style.display = 'none';
   }
-  // Cancel only while the order is still waiting for a rider
-  document.getElementById('cancelOrderBtn').classList.toggle('hidden', hasRider || cur.status !== 'Pending');
-  // "Pay now" button for online orders that are not paid yet
+  updateLiveMap(cur, hasRider, done);
+  const age = cur.riderAt ? Math.round((Date.now() - cur.riderAt) / 1000) : null;
+  const inf = hasRider && !done && window._mapInfo ? ` · ${window._mapInfo.km.toFixed(1)} km away, about ${window._mapInfo.min} min` : '';
+  $('mapLabel').innerText = done ? 'Delivered' : !hasRider ? 'Rider location not shared yet' : (age != null && age < 120 ? `🛵 Rider live location · updated ${age < 60 ? age + ' sec' : Math.round(age / 60) + ' min'} ago` : age != null ? '🛵 Rider location last seen a while ago' : '🛵 Waiting for the rider to share location') + inf;
+  // invoice
+  $('invPlaced').innerText = fmtT(cur.placedAt || cur.date);
+  $('invCust').innerText = cur.customerName || ''; $('invMobile').innerText = '📞 ' + (cur.customerMobile || '');
+  $('invEmail').innerText = cleanEmail(cur.customerEmail) ? '✉️ ' + cur.customerEmail : ''; $('invAddr').innerText = '📍 ' + (cur.address || '');
+  const lines = cur.lines && cur.lines.length && cur.lines[0].name ? cur.lines : null;
+  $('invItems').innerHTML = lines ? lines.map(l => `<tr><td style="padding:3px 0">${escA(l.name)}</td><td style="text-align:center">${l.qty}</td><td style="text-align:right">₹${(l.price || 0) * l.qty}</td></tr>`).join('') : `<tr><td colspan="3">${escA(cur.items || '')}</td></tr>`;
+  const row = (a, b, bold) => `<div style="display:flex;justify-content:space-between;padding:2px 0;${bold ? 'font-weight:800;font-size:13px' : 'color:#78716c'}"><span>${a}</span><span>${b}</span></div>`;
+  $('invTotals').innerHTML = (cur.subtotal != null ? row('Subtotal', '₹' + cur.subtotal) : '') + (cur.fee != null ? row('Delivery fee', cur.fee ? '₹' + cur.fee : 'FREE') : '') + (cur.discount > 0 ? row('Discount', '-₹' + cur.discount) : '') + row('Total', '₹' + cur.total, true);
+  $('invPay').innerText = (cur.paymentMode === 'Online' ? 'Payment: online (UPI)' : 'Payment: cash on delivery') + ' - ' + cur.paymentStatus;
+  // chat
+  const box = $('chatMessagesBox'), msgs = [{ from: 's', t: 'Hello! Your order is being processed. Once assigned, your rider will message here.' }, ...(cur.chat || [])], hh = JSON.stringify(msgs);
+  if (box.dataset.h !== hh) {
+    box.dataset.h = hh;
+    box.innerHTML = msgs.map(m => m.from === 'c' ? `<div style="background:#f5f5f4;padding:7px 9px;border-radius:10px;margin:4px 0 4px auto;width:fit-content;max-width:85%;font-size:12px">${escA(m.t)}</div>` : `<div style="background:#ecfdf5;color:#064e3b;padding:7px 9px;border-radius:10px;margin:4px 0;width:fit-content;max-width:85%;font-size:12px">${m.from === 'r' ? '🛵 ' : '🏪 '}${escA(m.t)}</div>`).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+  // cancel stays until delivered
+  $('cancelOrderBtn').style.display = done ? 'none' : 'block'; if (done) $('cancelConfirm').style.display = 'none';
   const needsPay = cur.paymentMode === 'Online' && cur.paymentStatus !== 'Paid' && UPI_READY;
-  document.getElementById('payNowWrap').classList.toggle('hidden', !needsPay);
-  if (needsPay) {
-    document.getElementById('payNowBtn').href = upiPayUrl(cur.total, cur.id);
-    document.getElementById('payNowText').innerText = `Pay ₹${cur.total} via UPI`;
-  }
+  $('payNowWrap').classList.toggle('hidden', !needsPay);
+  if (needsPay) { $('payNowBtn').href = upiPayUrl(cur.total, cur.id); $('payNowText').innerText = `Pay ₹${cur.total} via UPI`; }
 }
 
 function toggleWishlist(id) {
@@ -791,7 +799,7 @@ function renderProducts() {
     grid.innerHTML = `<div class="col-span-2 md:col-span-4 text-center text-stone-400 text-xs py-10">${productsState === 'loading' ? 'Loading items…' : productsState === 'error' ? 'Could not load items. Please check your connection and refresh.' : 'Items are being added. Please check back soon.'}</div>`;
     return;
   }
-  const filtered = products.filter(p => (activeCategory === 'all' || p.category === activeCategory) && p.name.toLowerCase().includes(search));
+  const filtered = products.filter(p => (activeCategory === 'all' || catKey(p.category) === catKey(activeCategory)) && p.name.toLowerCase().includes(search));
   document.getElementById('productCountLabel').innerText = `${filtered.length} items`;
   filtered.forEach(p => {
     const qty = cart[p.id] ? cart[p.id].qty : 0;
@@ -930,26 +938,39 @@ function openCategoriesPage() {
   document.getElementById('categoriesPageView').classList.remove('hidden');
   window.scrollTo(0, 0);
 }
-function filterCategoryAndGoHome(cat) { filterCategory(cat); showHomeView(); }
-function showCancelBanner(code) {
-  const b = document.getElementById('cancelledOrderBanner');
-  document.getElementById('cancelledOrderText').innerText = code ? `Your order ${code} has been cancelled successfully.` : 'Your order has been cancelled successfully.';
-  b.classList.remove('hidden'); b.classList.add('flex');
-  clearTimeout(window._cbT); window._cbT = setTimeout(() => { b.classList.add('hidden'); b.classList.remove('flex'); }, 5000);
-}
+function filterCategoryAndGoHome(cat) { filterCategory(cat, true); showHomeView(); setTimeout(() => { const r = document.getElementById('resultsHead'); window.scrollTo({ top: Math.max(0, r.getBoundingClientRect().top + window.scrollY - 12), behavior: 'smooth' }); }, 80); }
+function showCancelBanner(code) { zdBanner(code ? `Order ${code} cancelled successfully.` : 'Order cancelled successfully.'); }
 const escA = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const catKey = n => String(n || '').toLowerCase().replace(/&/g, ' ').replace(/\band\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+const isUrl = s => /^(https?:)?\/\/|^\/|^assets\/|^data:image/i.test(s || '');
+const iconHtml = i => isUrl(i) ? `<img src="${escA(i)}" alt="" onerror="this.replaceWith(document.createTextNode('🛒'))">` : escA(i || '🛒');
+function cleanCats() {
+  const out = [], seen = {};
+  (ZSET.categories || []).forEach(c => { const k = catKey(c.name); if (seen[k] !== undefined) { const e = out[seen[k]]; if (!isUrl(e.icon) && isUrl(c.icon)) e.icon = c.icon; return; } seen[k] = out.length; out.push({ ...c }); });
+  return out;
+}
 function renderCatUI() {
-  const cs = ZSET.categories || []; if (!cs.length) return;
-  window.ALLLBL = window.ALLLBL || document.getElementById('cat-all').innerText;
-  const on = 'bg-[#1b4332] text-white', off = 'bg-white text-stone-600 border border-[#e6e2dd]';
-  const chip = (v, l) => `<button onclick="filterCategory(this.dataset.c)" data-c="${escA(v)}" id="cat-${escA(v)}" class="cat-btn ${activeCategory === v ? on : off} text-xs font-semibold px-4 py-2 rounded-xl whitespace-nowrap">${escA(l)}</button>`;
-  document.getElementById('catChips').innerHTML = chip('all', window.ALLLBL) + cs.map(c => chip(c.name, c.name)).join('');
+  const cs = cleanCats(); if (!cs.length) return;
+  const sel = catKey(activeCategory), on = c => activeCategory !== 'all' && catKey(c.name) === sel;
+  const cell = c => `<div class="zd-cc${on(c) ? ' on' : ''}" data-c="${escA(c.name)}" onclick="filterCategory(this.dataset.c)"><div class="zd-ci">${iconHtml(c.icon)}</div><span>${escA(c.name)}</span></div>`;
+  document.getElementById('catFilterGrid').innerHTML = cs.slice(0, 5).map(cell).join('') + '<div class="zd-cc" onclick="openCategoriesPage()"><div class="zd-ci zd-all"><i class="fa-solid fa-grip"></i></div><span>Explore all</span></div>';
+  const bar = document.getElementById('activeCatBar'); bar.style.display = activeCategory === 'all' ? 'none' : 'flex'; document.getElementById('activeCatLabel').innerText = 'Showing: ' + activeCategory;
   const g = {}; cs.forEach(c => (g[c.group || 'Other'] = g[c.group || 'Other'] || []).push(c));
-  document.getElementById('catPageBody').innerHTML = Object.entries(g).map(([n, l]) => `<h3 class="zd-cat-h">${escA(n)}</h3><div class="zd-cgrid">${l.map(c => `<div class="zd-ctile" data-c="${escA(c.name)}" onclick="filterCategoryAndGoHome(this.dataset.c)"><div class="zd-cimg">${escA(c.icon || '🛒')}</div><span>${escA(c.name)}</span></div>`).join('')}</div>`).join('');
+  document.getElementById('catPageBody').innerHTML = Object.entries(g).map(([n, l]) => `<h3 class="zd-cat-h">${escA(n)}</h3><div class="zd-cgrid">${l.map(c => `<div class="zd-ctile" data-c="${escA(c.name)}" onclick="filterCategoryAndGoHome(this.dataset.c)"><div class="zd-cimg">${iconHtml(c.icon)}</div><span>${escA(c.name)}</span></div>`).join('')}</div>`).join('');
 }
 let addrCoords = null;
 function useMyLocation() {
-  navigator.geolocation.getCurrentPosition(p => { addrCoords = { lat: p.coords.latitude, lng: p.coords.longitude }; const b = document.getElementById('useLocBtn'); b.innerText = '✅ Current location captured'; }, () => alert('Could not get your location. Please allow location access, or just type your full address.'), { enableHighAccuracy: true, timeout: 12000 });
+  const b = document.getElementById('useLocBtn'); b.innerText = 'Getting your location…';
+  navigator.geolocation.getCurrentPosition(async p => {
+    addrCoords = { lat: p.coords.latitude, lng: p.coords.longitude }; b.innerText = '✅ Current location captured';
+    try {
+      const j = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=${addrCoords.lat}&lon=${addrCoords.lng}`).then(x => x.json()), a = j.address || {};
+      const set = (id, v) => { const el = document.getElementById(id); if (el && v && !el.value.trim()) { el.value = v; clearFieldError(id); } };
+      set('deliveryAddress', [a.road, a.neighbourhood || a.suburb].filter(Boolean).join(', '));
+      const c = document.getElementById('custCityInput'); const city = a.city || a.town || a.village || a.state_district; if (city && (!c.value.trim() || c.value === 'Ahmedabad')) c.value = city;
+      set('custPincodeInput', a.postcode);
+    } catch (e) {}
+  }, () => { b.innerText = '📍 Use my current location (more accurate)'; zdBanner('Could not get your location. Please allow location access, or type your full address.'); }, { enableHighAccuracy: true, timeout: 12000 });
 }
 function hideAllViews() {
   document.getElementById('categoriesPageView').classList.add('hidden'); setNav();
@@ -973,22 +994,24 @@ function openUserProfilePage() {
   window.scrollTo(0, 0);
 }
 
-function filterCategory(cat) {
-  activeCategory = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => {
-    b.classList.remove('bg-[#1b4332]', 'text-white');
-    b.classList.add('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]');
-  });
-  const el = document.getElementById(`cat-${cat}`);
-  if (el) { el.classList.add('bg-[#1b4332]', 'text-white'); el.classList.remove('bg-white', 'text-stone-600', 'border', 'border-[#e6e2dd]'); }
-  renderProducts();
+function filterCategory(cat, force) {
+  const same = catKey(cat) === catKey(activeCategory) && activeCategory !== 'all';
+  activeCategory = (!force && same) ? 'all' : cat;
+  renderCatUI(); renderProducts();
 }
-function filterProducts(){ renderProducts(); }
+let _st = null;
+function filterProducts() {
+  renderProducts(); clearTimeout(_st);
+  _st = setTimeout(() => {
+    const i = document.getElementById('searchInput'); if (!i.value.trim()) return;
+    window.scrollTo({ top: Math.max(0, i.getBoundingClientRect().top + window.scrollY - 10), behavior: 'smooth' });
+  }, 120);
+}
 
 function updateQty(id, change) {
   const prod = products.find(p => p.id === id);
   if (!prod) return;
-  if (change > 0 && (cart[id] ? cart[id].qty : 0) >= prod.stock) { alert(prod.stock > 0 ? `Only ${prod.stock} left in stock.` : 'Sorry, this item is out of stock.'); return; }
+  if (change > 0 && (cart[id] ? cart[id].qty : 0) >= prod.stock) { zdBanner(prod.stock > 0 ? `Only ${prod.stock} left in stock.` : 'Sorry, this item is out of stock.'); return; }
   if (!cart[id]) { if (change > 0) cart[id] = { ...prod, qty: 1 }; }
   else { cart[id].qty += change; if (cart[id].qty <= 0) delete cart[id]; }
   updateCartUI(); renderProducts();
@@ -1051,7 +1074,10 @@ function updateCartUI() {
   document.getElementById('subtotalAmount').innerText = `₹${subtotal}`;
   document.getElementById('deliveryFeeDisplay').innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
   document.getElementById('totalPayable').innerText = `₹${total}`;
+  const cc = document.getElementById('cartCoupons');
+  cc.innerHTML = subtotal > 0 ? '<div style="font-weight:800;font-size:12px;color:#1b4332;margin-bottom:6px">Available coupons</div>' + availableOffers.map(o => { const ok = subtotal >= o.minOrder; return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px dashed ${ok ? '#34d399' : '#d6d3d1'};border-radius:12px;padding:8px 10px;margin-bottom:6px;font-size:11px"><div><b>${o.code}</b> · ${o.discount}<div style="color:#78716c">${ok ? o.desc : 'Add ₹' + (o.minOrder - subtotal) + ' more to use'}</div></div><button onclick="useCoupon('${o.code}')" style="border:0;border-radius:8px;padding:6px 12px;font-weight:700;font-size:11px;background:${ok ? '#1b4332' : '#e7e5e4'};color:${ok ? '#fff' : '#78716c'}">${ok ? 'Apply' : 'Locked'}</button></div>`; }).join('') : '';
 }
+function useCoupon(code) { document.getElementById('promoInput').value = code; applyPromo(); }
 
 function toggleCart(){ document.getElementById('cartModal').classList.toggle('hidden'); }
 
@@ -1126,22 +1152,24 @@ function applyPromo() {
   const code = document.getElementById('promoInput').value.trim().toUpperCase();
   const subtotal = cartSubtotal();
   const o = availableOffers.find(x => x.code === code);
-  if (!o) { alert('Invalid promo code.'); return; }
-  if (subtotal < o.minOrder) { alert(`Code "${o.code}" requires minimum spend of ₹${o.minOrder}.`); return; }
+  if (!o) { zdBanner('Invalid promo code.'); return; }
+  if (subtotal < o.minOrder) { zdBanner(`Code "${o.code}" requires minimum spend of ₹${o.minOrder}.`); return; }
   if (code === 'WELCOME10') appliedDiscount = 10;
   else if (code === 'FRESH20') appliedDiscount = Math.round(subtotal * 0.20);
   else if (code === 'QUICK50') appliedDiscount = 50;
   else if (code === 'SNACK15') appliedDiscount = 15;
   confetti({ particleCount: 50, spread: 60 });
-  alert(`Promo code ${code} applied successfully!`);
+  zdBanner(`Promo code ${code} applied successfully!`);
   updateCartUI();
 }
 
 function proceedToAddressStep() {
-  if (Object.keys(cart).length === 0) { alert('Your cart is empty!'); return; }
+  if (Object.keys(cart).length === 0) { zdBanner('Your cart is empty!'); return; }
   const a = getAuthData();
   const fill = (id, v) => { const el = document.getElementById(id); if (el && !el.value && v) el.value = v; };
   fill('custNameInput', a.name); fill('custMobileInput', a.phone); fill('custEmailInput', a.email);
+  let sa = {}; try { sa = JSON.parse(localStorage.getItem('zipdash_saved_addr') || '{}'); } catch (e) {}
+  fill('deliveryAddress', sa.address); fill('custLandmarkInput', sa.landmark); fill('custPincodeInput', sa.pin); if (sa.city) document.getElementById('custCityInput').value = sa.city; if (sa.lat != null && !addrCoords && sa.addrText === document.getElementById('deliveryAddress').value) addrCoords = { lat: sa.lat, lng: sa.lng };
   toggleCart();
   document.getElementById('addressModal').classList.remove('hidden');
 }
@@ -1188,13 +1216,13 @@ async function proceedToPaymentStep() {
     }
   });
 
+  const bad = (id, msg) => { const el = document.getElementById(id), e = document.getElementById('err_' + id); if (e) { e.innerText = msg; e.classList.remove('hidden'); } el.classList.add('border-rose-600', 'ring-1', 'ring-rose-600'); if (!firstInvalid) firstInvalid = el; };
+  const mob = document.getElementById('custMobileInput').value.replace(/\D/g, ''); if (mob && mob.length !== 10) bad('custMobileInput', 'Enter a valid 10-digit mobile number *');
+  const pin = document.getElementById('custPincodeInput').value.trim(); if (pin && !/^\d{6}$/.test(pin)) bad('custPincodeInput', 'Enter a valid 6-digit pincode *');
+  const em = document.getElementById('custEmailInput').value.trim(); if (em && !/^\S+@\S+\.\S+$/.test(em)) bad('custEmailInput', 'Enter a valid email or leave it empty');
   if (firstInvalid) {
-    const scrollBox = document.getElementById('addressModalScrollBox');
-    scrollBox.scrollTo({
-      top: firstInvalid.offsetTop - 20,
-      behavior: 'smooth'
-    });
-    firstInvalid.focus();
+    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    firstInvalid.focus({ preventScroll: true });
     return;
   }
   if (!(await checkServiceable())) return;
@@ -1218,12 +1246,13 @@ async function placeOrderAction() {
   const address = document.getElementById('deliveryAddress').value.trim();
   const city = document.getElementById('custCityInput').value.trim();
   const pincode = document.getElementById('custPincodeInput').value.trim();
-  const fullAddress = `${address}, City: ${city} - ${pincode}`;
+  const landmark = document.getElementById('custLandmarkInput').value.trim();
+  const fullAddress = `${address}${landmark ? ', Landmark: ' + landmark : ''}, City: ${city} - ${pincode}`;
   const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
 
-  if (paymentMode === 'Online' && !UPI_READY) { alert('Online payment is not set up yet. Please choose Cash on Delivery.'); return; }
-  if (!window.fb) { alert('Cannot reach the store server. Please check your internet and try again.'); return; }
-  if (Object.keys(cart).length === 0) { alert('Your cart is empty!'); return; }
+  if (paymentMode === 'Online' && !UPI_READY) { zdBanner('Online payment is not set up yet. Please choose Cash on Delivery.'); return; }
+  if (!window.fb) { zdBanner('Cannot reach the store server. Please check your internet and try again.'); return; }
+  if (Object.keys(cart).length === 0) { zdBanner('Your cart is empty!'); return; }
   if (placing) return;
 
   let subtotal = 0; const items = [];
@@ -1231,22 +1260,23 @@ async function placeOrderAction() {
   const fee = feeFor(subtotal);
   const finalTotal = subtotal + fee - appliedDiscount;
   const orderCode = "ORD-" + Math.floor(1000 + Math.random() * 9000);
-  const lines = Object.values(cart).map(i => ({ id: i.id, qty: i.qty }));
+  const lines = Object.values(cart).map(i => ({ id: i.id, qty: i.qty, name: i.name, price: i.price }));
 
   const order = {
     id: orderCode, customerName: name, customerMobile: mobile, customerPhone: getAuthData().phone || mobile,
     customerEmail: email, address: fullAddress, items: items.join(', '),
-    total: finalTotal, paymentMode, paymentStatus: paymentMode === 'Online' ? 'Awaiting payment' : 'Pay on delivery',
+    subtotal, fee, discount: appliedDiscount, placedAt: Date.now(), total: finalTotal, paymentMode, paymentStatus: paymentMode === 'Online' ? 'Awaiting payment' : 'Pay on delivery',
     customerLat: userPos ? userPos.lat : null, customerLng: userPos ? userPos.lng : null, status: 'Pending', riderName: '', riderPhone: '', riderEmail: '', date: new Date().toISOString()
   };
 
   placing = true;
   let docId;
   try { docId = await fb.placeOrder(order, lines); }   // checks live stock + reduces it in one safe step
-  catch (e) { placing = false; alert(e.message || 'Could not place the order. Please try again.'); return; }
+  catch (e) { placing = false; zdBanner(e.message || 'Could not place the order. Please try again.'); return; }
   placing = false;
 
   localStorage.setItem('zipdash_current_order_id', docId);
+  try { localStorage.setItem('zipdash_saved_addr', JSON.stringify({ address, landmark, city, pin: pincode, lat: userPos ? userPos.lat : null, lng: userPos ? userPos.lng : null, addrText: address })); } catch (e) {}
   watchCurrentOrder(docId);
 
   // Empty the cart after the order is placed
@@ -1256,61 +1286,70 @@ async function placeOrderAction() {
   if (currentView.view === 'item') openItemPage(currentView.id);
 
   closePaymentModal();
-  triggerHeartBoxAnimation();
+  confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+  zdBanner('🎉 Order placed successfully!');
+  openLiveTracking();
   if (paymentMode === 'Online') setTimeout(() => { window.location.href = upiPayUrl(finalTotal, orderCode); }, 1500);
 }
 
-function triggerHeartBoxAnimation() {
-  document.getElementById('uniqueQuoteText').innerText = uniqueQuotes[Math.floor(Math.random() * uniqueQuotes.length)];
-  document.getElementById('heartBoxModal').classList.remove('hidden');
-  confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
-  let t = 5;
-  document.getElementById('countdownTimer').innerText = t;
-  if (heartTimer) clearInterval(heartTimer);
-  heartTimer = setInterval(() => {
-    t--; document.getElementById('countdownTimer').innerText = t;
-    if (t <= 0) { clearInterval(heartTimer); closeHeartBoxAndTrack(); }
-  }, 1000);
+let zmap = null, zmapP = null; const destCache = {};
+async function geocodeText(q) {
+  const vb = '&viewbox=72.35,23.20,72.85,22.85';
+  for (const t of [q, q.replace(/City:\s*/i, '')]) {
+    try { const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in' + vb + '&q=' + encodeURIComponent(t + ', India')).then(x => x.json()); if (r && r[0]) return { lat: +r[0].lat, lng: +r[0].lon }; } catch (e) { return null; }
+  }
+  return null;
 }
-function closeHeartBoxAndTrack() {
-  if (heartTimer) clearInterval(heartTimer);
-  document.getElementById('heartBoxModal').classList.add('hidden');
-  openLiveTracking();
+async function getDest(cur) {
+  if (cur.customerLat != null) return { lat: +cur.customerLat, lng: +cur.customerLng };
+  if (destCache[cur.docId]) return destCache[cur.docId];
+  const r = await geocodeText(cur.address || ''); if (!r) return null;
+  destCache[cur.docId] = r; try { fb.updateOrder(cur.docId, { customerLat: r.lat, customerLng: r.lng }); } catch (e) {} return r;
+}
+async function updateLiveMap(cur, hasRider, done) {
+  const empty = document.getElementById('mapEmpty');
+  if (!hasRider || done) { empty.style.display = 'flex'; empty.querySelector('span').innerText = done ? 'Delivered. Thank you!' : 'The live map opens here automatically once a rider is assigned'; return; }
+  if (!window.ZMap) { empty.style.display = 'flex'; empty.querySelector('span').innerText = 'Map file missing: upload zipdash-map.js next to index.html'; return; }
+  if (!zmapP) zmapP = ZMap.create(document.getElementById('liveMap'), { onInfo: i => { window._mapInfo = i; if (currentOrder) { const a = currentOrder.riderAt ? Math.round((Date.now() - currentOrder.riderAt) / 1000) : null; } } }).then(m => zmap = m).catch(e => { zmapP = null; empty.style.display = 'flex'; empty.querySelector('span').innerText = 'Could not load the map. Please check your internet.'; return null; });
+  const m = await zmapP; if (!m) return;
+  empty.style.display = 'none';
+  const dest = await getDest(cur);
+  m.set({ rider: cur.riderLat != null ? { lat: +cur.riderLat, lng: +cur.riderLng } : null, dest, store: ZSET.lat != null ? { lat: ZSET.lat, lng: ZSET.lng } : null });
+  const inf = window._mapInfo ? ` · ${window._mapInfo.km.toFixed(1)} km away, about ${window._mapInfo.min} min` : '';
+  if (cur.riderAt) { const age = Math.round((Date.now() - cur.riderAt) / 1000); document.getElementById('mapLabel').innerText = (age < 120 ? `🛵 Rider live location · updated ${age < 60 ? age + ' sec' : Math.round(age / 60) + ' min'} ago` : '🛵 Rider location last seen a while ago') + inf; }
 }
 function openLiveTracking() {
+  if (!currentOrder) { zdBanner('You have no active order right now.'); return; }
   checkActiveOrderStatus();
   document.getElementById('liveTrackingModal').classList.remove('hidden');
+  setTimeout(() => zmap && zmap.resize(), 250);
 }
-function closeLiveTracking(){ document.getElementById('liveTrackingModal').classList.add('hidden'); }
-
+function closeLiveTracking() { document.getElementById('liveTrackingModal').classList.add('hidden'); keepOrder(); }
+function askCancel() { document.getElementById('cancelOrderBtn').style.display = 'none'; document.getElementById('cancelConfirm').style.display = 'block'; }
+function keepOrder() { document.getElementById('cancelConfirm').style.display = 'none'; const o = currentOrder; document.getElementById('cancelOrderBtn').style.display = (o && o.status !== 'Delivered' && o.status !== 'Cancelled') ? 'block' : 'none'; }
 async function cancelActiveOrder() {
-  const id = localStorage.getItem('zipdash_current_order_id');
-  if (!id || !window.fb) return;
+  const o = currentOrder; if (!o || !window.fb) return;
+  if (o.status === 'Delivered' || o.status === 'Cancelled') { zdBanner('This order is already ' + o.status.toLowerCase() + '.'); keepOrder(); return; }
   try {
-    await fb.cancelOrder(id);   // gives the stock back
-  } catch (e) { alert(e.message || 'Could not cancel this order.'); return; }
-  cart = {}; updateCartUI(); renderProducts();
-  const code = currentOrder ? currentOrder.id : '';
-  if (currentOrder) currentOrder.status = 'Cancelled';
+    await fb.updateOrder(o.docId, { status: 'Cancelled', cancelledAt: Date.now() });
+    await fb.mutateProducts(l => (o.lines || []).forEach(x => { const p = l.find(q => q.id === x.id); if (p) p.stock = (Number(p.stock) || 0) + x.qty; }));
+  } catch (e) { zdBanner('Could not cancel this order. Please try again.'); keepOrder(); return; }
+  o.status = 'Cancelled'; localStorage.removeItem('zipdash_current_order_id');
   closeLiveTracking(); checkActiveOrderStatus();
-  showCancelBanner(code);
+  zdBanner(`Order ${o.id} cancelled successfully.`);
 }
-
 function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  if (!input.value.trim()) return;
-  const box = document.getElementById('chatMessagesBox');
-  const div = document.createElement('div');
-  div.className = "bg-stone-100 text-stone-800 p-2 rounded-xl text-[11px] w-fit max-w-[85%] ml-auto font-medium";
-  div.textContent = input.value;
-  box.appendChild(div);
-  input.value = ''; box.scrollTop = box.scrollHeight;
+  const input = document.getElementById('chatInput'), t = input.value.trim();
+  if (!t || !currentOrder || !window.fb) return;
+  fb.addChat(currentOrder.docId, { from: 'c', t, at: Date.now() }).catch(() => zdBanner('Could not send. Please try again.'));
+  input.value = '';
 }
 </script>
 <script src="zipdash-db.js"></script>
+<script src="zipdash-map.js"></script>
 <script>
 window.fb = Object.assign({}, ZD, { watchMyOrders: cb => ZD.watchMyOrders(getAuthData().phone || '', cb) });
-fb.watchSettings(s => { ZSET = s; try { renderCatUI(); updateCartUI(); setNav(); } catch (e) {} });
+fb.watchSettings(s => { ZSET = s; try { renderCatUI(); updateCartUI(); setNav(); const n = document.getElementById('deliveryNote'); if (s.lat != null) { n.style.display = 'block'; n.innerText = `📍 We deliver within ${s.radiusKm} km of our store. Your address is checked when you continue.`; } else n.style.display = 'none'; } catch (e) {} });
 document.getElementById('deliveryAddress').addEventListener('input', () => { addrCoords = null; const b = document.getElementById('useLocBtn'); if (b) b.innerText = '📍 Use my current location (more accurate)'; });
 </script>
 </body>
