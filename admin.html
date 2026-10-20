@@ -61,10 +61,11 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
     <div class="space-y-3 text-xs">
       <input type="hidden" id="editItemIndex" value="-1">
       <div><label class="block font-bold text-stone-700 mb-1">Category *</label>
-        <select id="newItemCategory" onchange="document.getElementById('newCatBox').style.display=this.value==='__new__'?'block':'none'" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
+        <select id="newItemCategory" onchange="zdFillIcon()" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
           <option value="Snacks &amp; Instant">Snacks &amp; Instant</option><option value="Drinks &amp; Beverages">Drinks &amp; Beverages</option><option value="Dairy &amp; Breakfast">Dairy &amp; Breakfast</option><option value="Biscuits &amp; Chocolates">Biscuits &amp; Chocolates</option></select>
+        <input id="catIconLink" placeholder="Category icon: emoji or image link" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]" style="margin-top:6px">
         <div id="newCatBox" style="display:none;margin-top:6px"><input id="newCatName" placeholder="New category name" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]">
-          <div style="display:flex;gap:6px;margin-top:6px"><input id="newCatGroup" list="zdGroups" placeholder="Section (e.g. Grocery &amp; Kitchen)" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"><input id="newCatIcon" placeholder="Icon 🛒" style="max-width:80px" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div><datalist id="zdGroups"></datalist></div>
+          <div style="display:flex;gap:6px;margin-top:6px"><input id="newCatGroup" list="zdGroups" placeholder="Section (e.g. Grocery &amp; Kitchen)" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"><input id="newCatIcon" placeholder="Icon: emoji or image link" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div><datalist id="zdGroups"></datalist></div>
         <label class="block font-bold text-stone-700 text-xs mb-1" style="margin-top:10px">Container type (bottle, can, packet…)</label>
         <select id="newItemContainer" onchange="document.getElementById('newContainerName').style.display=this.value==='__new__'?'block':'none'" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"><option value="">— none —</option></select>
         <input id="newContainerName" placeholder="New container type" style="display:none;margin-top:6px" class="w-full bg-stone-50 border border-[#e6e2dd] rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#1b4332]"></div>
@@ -167,56 +168,64 @@ function switchAdminView(view) {
   if (view === 'liveorders') renderLiveOrders();
 }
 
+const escA = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+const fmtT = v => { if (!v) return '-'; const d = new Date(v); return isNaN(d) ? '-' : d.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); };
+const cleanEmail = e => (e && e !== 'Not provided') ? e : '';
+const catKey = n => String(n || '').toLowerCase().replace(/&/g, ' ').replace(/\band\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+const riderUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 'rider.html?o=' + id;
+const itemsTxt = o => (o.lines && o.lines.length && o.lines[0].name) ? o.lines.map(l => `${escA(l.name)} × ${l.qty}`).join(', ') : escA(o.items || '');
+let delConfirmId = null;
 function renderLiveOrders() {
   const allOrders = orders();
-  const liveList = document.getElementById('liveOrdersList');
-  const deliveredList = document.getElementById('deliveredOrdersList');
+  const liveList = document.getElementById('liveOrdersList'), deliveredList = document.getElementById('deliveredOrdersList');
   liveList.innerHTML = ''; deliveredList.innerHTML = '';
   const activeOrders = allOrders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
   const deliveredOrders = allOrders.filter(o => o.status === 'Delivered');
-
-  if (activeOrders.length === 0) {
-    liveList.innerHTML = `<div class="bg-white border rounded-2xl p-6 text-center text-stone-400 text-xs">No pending orders right now.</div>`;
-  } else {
-    activeOrders.reverse().forEach(ord => {
-      liveList.innerHTML += `
-        <div class="bg-white border rounded-2xl p-4 shadow-sm space-y-2">
-          <div class="flex justify-between items-center border-b pb-2">
-            <span class="font-extrabold text-xs text-[#1b4332]">${ord.id}</span>
-            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">${ord.status}</span>
-          </div>
-          <div class="text-xs space-y-1 text-stone-700">
-            <p><b>Customer:</b> ${ord.customerName} (${ord.customerMobile})</p>
-            <p><b>Items:</b> ${ord.items}</p>
-            <p><b>Address:</b> ${ord.address}</p>
-            <p><b>Payment:</b> ${ord.paymentMode} - ${ord.paymentStatus}</p>
-            ${(ord.chat || []).slice(-3).map(m => `<p class="text-[11px] text-stone-500">${m.from === 'c' ? '👤' : m.from === 'r' ? '🛵' : '🏪'} ${escA(m.t)}</p>`).join('')}
-            <p class="font-extrabold text-[#1b4332]">Total: ₹${ord.total}</p>
-            ${ord.riderName ? `<p class="text-emerald-700 font-bold">🛵 Assigned Rider: ${ord.riderName} (${ord.riderPhone})</p>` : ''}
-          </div>
-          <div class="flex flex-wrap gap-2 pt-2">
-            <button onclick="openAssignModal('${ord.id}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">${ord.riderName ? 'Re-assign Rider' : 'Pending (Assign Rider)'}</button>
-            <button onclick="markOrderDelivered('${ord.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">Mark Delivered ✓</button>
-            ${ord.paymentMode === 'Online' && ord.paymentStatus !== 'Paid' ? `<button onclick="markPaid('${ord.docId}')" class="bg-sky-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">💰 Mark Paid</button>` : ''}
-            <button onclick="replyChat('${ord.docId}')" class="bg-stone-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">💬 Chat${(ord.chat || []).length ? ' (' + ord.chat.length + ')' : ''}</button>
-            ${ord.riderName ? `<button onclick="sendRiderLink('${ord.docId}','${ord.riderPhone}')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">📲 Send rider link</button>` : ''}
-          </div>
-        </div>`;
-    });
-  }
-
-  if (deliveredOrders.length === 0) {
-    deliveredList.innerHTML = `<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No delivered orders yet.</div>`;
-  } else {
-    deliveredOrders.reverse().forEach(ord => {
-      deliveredList.innerHTML += `
-        <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-3 shadow-sm text-xs space-y-1">
-          <div class="flex justify-between font-bold text-emerald-900"><span>${ord.id} - ${ord.customerName}</span><span>₹${ord.total}</span></div>
-          <p class="text-[10px] text-stone-600">🛒 ${ord.items}</p>
-          <p class="text-[10px] text-emerald-700">🛵 Delivered by: ${ord.riderName || 'Store Team'}</p>
-        </div>`;
-    });
-  }
+  if (activeOrders.length === 0) liveList.innerHTML = `<div class="bg-white border rounded-2xl p-6 text-center text-stone-400 text-xs">No pending orders right now.</div>`;
+  activeOrders.slice().reverse().forEach(ord => {
+    const hasR = !!(ord.riderName && ord.riderName.trim()), age = ord.riderAt ? Math.round((Date.now() - ord.riderAt) / 1000) : null;
+    const loc = !hasR ? '' : age == null ? '<span style="color:#b45309">Rider location: not shared yet</span>' : age < 120 ? `<span style="color:#15803d">Rider location live, ${age < 60 ? age + ' sec' : Math.round(age / 60) + ' min'} ago</span>` : '<span style="color:#b91c1c">Rider location off / last seen a while ago</span>';
+    liveList.innerHTML += `
+      <div class="bg-white border rounded-2xl p-4 shadow-sm space-y-2">
+        <div class="flex justify-between items-center border-b pb-2">
+          <span class="font-extrabold text-xs text-[#1b4332]">${ord.id}</span>
+          <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">${hasR ? 'Out for delivery' : 'Waiting for rider'}</span>
+        </div>
+        <p class="text-[11px] text-stone-500">Placed: ${fmtT(ord.placedAt || ord.date)} · Delivered: not yet</p>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px" class="text-xs text-stone-700">
+          <div><div class="text-[10px] text-stone-400">Customer</div><b>${escA(ord.customerName || '')}</b><div>${escA(ord.customerMobile || '')}</div>${cleanEmail(ord.customerEmail) ? `<div class="text-stone-500">${escA(ord.customerEmail)}</div>` : ''}</div>
+          <div><div class="text-[10px] text-stone-400">Rider</div>${hasR ? `<b>${escA(ord.riderName)}</b><div>${escA(ord.riderPhone || '')}</div>${cleanEmail(ord.riderEmail) ? `<div class="text-stone-500">${escA(ord.riderEmail)}</div>` : ''}` : '<span class="text-stone-400">Waiting for the rider to open the link and enter details</span>'}</div>
+        </div>
+        <div class="text-xs text-stone-700 space-y-1">
+          <p><b>Items:</b> ${itemsTxt(ord)}</p>
+          <p><b>Address:</b> ${escA(ord.address || '')}</p>
+          <p><b>Payment:</b> ${ord.paymentMode} - ${ord.paymentStatus}</p>
+          <p class="font-extrabold text-[#1b4332]">Total: ₹${ord.total}</p>
+          <p class="text-[11px]">${loc}</p>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button onclick="copyRiderLink('${ord.docId}')" class="bg-stone-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold">📋 Copy rider link</button>
+          <button onclick="sendRiderLink('${ord.docId}','${ord.riderPhone || ''}')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">📲 Send on WhatsApp</button>
+          ${ord.paymentMode === 'Online' && ord.paymentStatus !== 'Paid' ? `<button onclick="markPaid('${ord.docId}')" class="bg-sky-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">💰 Mark Paid</button>` : ''}
+          <button onclick="markOrderDelivered('${ord.id}')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold" title="Backup only. The rider normally marks delivery.">Mark Delivered ✓</button>
+        </div>
+        <div style="border-top:1px solid #eee;padding-top:6px">
+          ${(ord.chat || []).slice(-3).map(m => `<p class="text-[11px] text-stone-500">${m.from === 'c' ? '👤' : m.from === 'r' ? '🛵' : '🏪'} ${escA(m.t)}</p>`).join('')}
+          <div style="display:flex;gap:6px;margin-top:4px"><input id="rc_${ord.docId}" placeholder="Reply to customer / rider" style="flex:1;border:1px solid #ddd;border-radius:10px;padding:6px 8px;font-size:12px"><button onclick="replyChat('${ord.docId}')" class="bg-stone-700 text-white px-3 rounded-xl text-xs font-bold">Send</button></div>
+        </div>
+      </div>`;
+  });
+  if (deliveredOrders.length === 0) deliveredList.innerHTML = `<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No delivered orders yet.</div>`;
+  deliveredOrders.slice().reverse().forEach(ord => {
+    deliveredList.innerHTML += `
+      <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-3 shadow-sm text-xs space-y-1">
+        <div class="flex justify-between font-bold text-emerald-900"><span>${ord.id} - ${escA(ord.customerName || '')}</span><span>₹${ord.total}</span></div>
+        <p class="text-[10px] text-stone-500">Placed ${fmtT(ord.placedAt || ord.date)} · Delivered ${fmtT(ord.deliveredAt)}</p>
+        <p class="text-[11px] text-stone-700">👤 ${escA(ord.customerMobile || '')}${cleanEmail(ord.customerEmail) ? ' · ' + escA(ord.customerEmail) : ''}</p>
+        <p class="text-[11px] text-stone-600">🛒 ${itemsTxt(ord)}</p>
+        <p class="text-[11px] text-emerald-700">🛵 ${escA(ord.riderName || 'Store Team')}${ord.riderPhone ? ' · ' + escA(ord.riderPhone) : ''}${cleanEmail(ord.riderEmail) ? ' · ' + escA(ord.riderEmail) : ''}</p>
+      </div>`;
+  });
 }
 
 function openAssignModal(orderId) {
@@ -231,7 +240,7 @@ function saveDeliveryAssignment() {
   const name = document.getElementById('riderNameInput').value.trim();
   const phone = document.getElementById('riderPhoneInput').value.trim();
   const email = document.getElementById('riderEmailInput').value.trim();
-  if (!name || !phone) { alert('Please enter Rider Name and Mobile Number.'); return; }
+  if (!name || !phone) { showAdminToast('Please enter Rider Name and Mobile Number.'); return; }
   const all = orders();
   const ord = all.find(o => o.id === orderId);
   if (ord) {
@@ -245,7 +254,7 @@ function markOrderDelivered(orderId) {
   const all = orders();
   const ord = all.find(o => o.id === orderId);
   if (ord) {
-    ZD.updateOrder(ord.docId, { status: 'Delivered', paymentStatus: ord.paymentMode === 'Online' ? ord.paymentStatus : 'Paid' });
+    ZD.updateOrder(ord.docId, { status: 'Delivered', deliveredAt: Date.now(), paymentStatus: ord.paymentMode === 'Online' ? ord.paymentStatus : 'Paid' });
     localStorage.removeItem('zipdash_current_order_id');
     showAdminToast(`Order ${orderId} marked as Delivered!`);
     renderLiveOrders();
@@ -254,7 +263,7 @@ function markOrderDelivered(orderId) {
 
 function resetItemForm() {
   document.getElementById('editItemIndex').value = '-1';
-  document.getElementById('newItemCategory').selectedIndex = 0; document.getElementById('newItemContainer').value = ''; ['newCatName','newCatGroup','newCatIcon','newContainerName'].forEach(i => document.getElementById(i).value = ''); document.getElementById('newCatBox').style.display = 'none'; document.getElementById('newContainerName').style.display = 'none';
+  document.getElementById('newItemCategory').selectedIndex = 0; zdFillIcon(); document.getElementById('newItemContainer').value = ''; ['newCatName','newCatGroup','newCatIcon','newContainerName'].forEach(i => document.getElementById(i).value = ''); document.getElementById('newCatBox').style.display = 'none'; document.getElementById('newContainerName').style.display = 'none';
   ['newItemName','newItemSize','newItemPrice','newItemImage'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('newItemStock').value = '20';
 }
@@ -268,7 +277,7 @@ function openEditItemModal(id) {
   const it = inventory.find(i => i.id === id);
   if (!it) return;
   document.getElementById('editItemIndex').value = String(id);
-  document.getElementById('newItemCategory').value = it.category; document.getElementById('newItemContainer').value = it.container || ''; document.getElementById('newCatBox').style.display = 'none'; document.getElementById('newContainerName').style.display = 'none';
+  document.getElementById('newItemCategory').value = it.category; document.getElementById('newItemContainer').value = it.container || ''; zdFillIcon(); document.getElementById('newCatBox').style.display = 'none'; document.getElementById('newContainerName').style.display = 'none';
   document.getElementById('newItemName').value = it.name;
   document.getElementById('newItemSize').value = it.weight || '';
   document.getElementById('newItemPrice').value = it.price;
@@ -288,15 +297,17 @@ function saveItemData() {
   let category = document.getElementById('newItemCategory').value, container = document.getElementById('newItemContainer').value;
   const cats = (ZS && ZS.categories) || [], cons = (ZS && ZS.containers) || [];
   if (category === '__new__') {
-    const n = document.getElementById('newCatName').value.trim(); if (!n) { alert('Enter the new category name.'); return; }
+    const n = document.getElementById('newCatName').value.trim(); if (!n) { showAdminToast('Enter the new category name.'); return; }
     category = n;
-    if (!cats.some(c => c.name.toLowerCase() === n.toLowerCase())) ZD.saveSettings({ categories: [...cats, { name: n, group: document.getElementById('newCatGroup').value.trim() || 'Other', icon: document.getElementById('newCatIcon').value.trim() || '🛒' }] });
+    const dup = cats.find(c => catKey(c.name) === catKey(n)); if (dup) category = dup.name; else ZD.saveSettings({ categories: [...cats, { name: n, group: document.getElementById('newCatGroup').value.trim() || 'Other', icon: document.getElementById('newCatIcon').value.trim() || document.getElementById('catIconLink').value.trim() || '🛒' }] });
   }
+  const exCat = cats.find(c => c.name === category), iconNew = document.getElementById('catIconLink').value.trim();
+  if (exCat && iconNew && iconNew !== (exCat.icon || '')) ZD.saveSettings({ categories: cats.map(c => c.name === category ? { ...c, icon: iconNew } : c) });
   if (container === '__new__') {
-    const n = document.getElementById('newContainerName').value.trim(); if (!n) { alert('Enter the new container type.'); return; }
+    const n = document.getElementById('newContainerName').value.trim(); if (!n) { showAdminToast('Enter the new container type.'); return; }
     container = n; if (!cons.includes(n)) ZD.saveSettings({ containers: [...cons, n] });
   }
-  if (!name || isNaN(price) || isNaN(stock)) { alert('Fill mandatory fields.'); return; }
+  if (!name || isNaN(price) || isNaN(stock)) { showAdminToast('Fill mandatory fields.'); return; }
   const editId = document.getElementById('editItemIndex').value;
   const image = document.getElementById('newItemImage').value.trim();
   if (editId !== '-1') {
@@ -338,14 +349,16 @@ function setFilter(filter) {
 }
 
 const es = i => i.oos ? 0 : (Number(i.stock) || 0);
-function deleteItem(id) { const it = inventory.find(i => i.id === id); if (it && confirm(`Delete "${it.name}" permanently? (Use "Out of stock" if you only want to hide it for now.)`)) { ZD.mutateProducts(l => { const k = l.findIndex(i => i.id === id); if (k > -1) l.splice(k, 1); }); showAdminToast('Product deleted'); } }
+function deleteItem(id) { delConfirmId = id; renderAdminPanel(); }
+function deleteNo() { delConfirmId = null; renderAdminPanel(); }
+function deleteYes(id) { delConfirmId = null; ZD.mutateProducts(l => { const k = l.findIndex(i => i.id === id); if (k > -1) l.splice(k, 1); }); showAdminToast('Product deleted'); }
 function markPaid(id) { ZD.updateOrder(id, { paymentStatus: 'Paid' }); showAdminToast('Marked as paid'); }
-function replyChat(id) { const t = prompt('Reply to customer:'); if (t && t.trim()) ZD.addChat(id, { from: 's', t: t.trim(), at: Date.now() }); }
+function replyChat(id) { const el = document.getElementById('rc_' + id); const t = el ? el.value.trim() : ''; if (!t) return; ZD.addChat(id, { from: 's', t, at: Date.now() }); el.value = ''; if (document.activeElement) document.activeElement.blur(); showAdminToast('Message sent'); }
+function copyRiderLink(id) { const u = riderUrl(id); try { navigator.clipboard.writeText(u); showAdminToast('Rider link copied. Send it to the rider.'); } catch (e) { showAdminToast(u, 8000); } }
 function sendRiderLink(id, phone) {
-  if (!window.ZD_CLOUD) { alert('The rider page needs Firebase to be connected (zipdash-db.js). Until then the rider cannot see this order on their phone.'); return; }
+  if (!window.ZD_CLOUD) { showAdminToast('Connect Firebase first, otherwise the rider cannot see this order.'); return; }
   let p = String(phone || '').replace(/\D/g, ''); if (p.length === 10) p = '91' + p;
-  const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'rider.html?o=' + id;
-  window.open(`https://wa.me/${p}?text=${encodeURIComponent('ZipDash delivery - open this link, tap Start sharing location: ' + url)}`, '_blank');
+  window.open(`https://wa.me/${p}?text=${encodeURIComponent('ZipDash delivery. Open this link, enter your details and allow location: ' + riderUrl(id))}`, '_blank');
 }
 function toggleOOS(id) { ZD.mutateProducts(l => { const it = l.find(i => i.id === id); if (it) it.oos = !it.oos; }); }
 function renderAdminPanel() {
@@ -390,7 +403,7 @@ function renderAdminPanel() {
           <div class="flex items-center gap-1">
             <button onclick="toggleOOS('${item.id}')" class="${item.oos ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100' : 'bg-rose-50 text-rose-800 hover:bg-rose-100'} px-2.5 py-1 rounded-lg text-xs font-bold transition">${item.oos ? '✅ Back in stock' : '🚫 Out of stock'}</button>
             <button onclick="openEditItemModal('${item.id}')" class="bg-[#d4a373]/30 text-[#1b4332] px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#d4a373]/50 transition"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button onclick="deleteItem('${item.id}')" class="bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-rose-100 transition" title="Delete product">🗑</button>
+            ${delConfirmId === item.id ? `<span class="text-xs font-bold text-rose-800">Delete? <button onclick="deleteYes('${item.id}')" class="bg-rose-600 text-white px-2 py-1 rounded-lg">Yes</button> <button onclick="deleteNo()" class="bg-stone-200 text-stone-800 px-2 py-1 rounded-lg">No</button></span>` : `<button onclick="deleteItem('${item.id}')" class="bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-rose-100 transition" title="Delete product">🗑</button>`}
             <button onclick="bumpStock('${item.id}', -1)" class="bg-rose-50 text-rose-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-rose-100 transition" title="Reduce stock">−</button>
             <span class="min-w-[2.25rem] text-center text-xs font-extrabold ${(pending[item.id] || 0) > 0 ? 'text-emerald-700' : (pending[item.id] || 0) < 0 ? 'text-rose-700' : 'text-stone-400'}">${(pending[item.id] || 0) > 0 ? '+' + pending[item.id] : (pending[item.id] || 0)}</span>
             <button onclick="bumpStock('${item.id}', 1)" class="bg-emerald-50 text-emerald-800 w-8 py-1 rounded-lg text-sm font-extrabold hover:bg-emerald-100 transition" title="Add stock">+</button>
@@ -439,7 +452,7 @@ function renderReports() {
 }
 
 ZD.watchProducts(l => { inventory = l; renderAdminPanel(); });
-ZD.watchOrders(o => { ORDERS = o; renderLiveOrders(); try { renderReports(); } catch (e) {} });
+ZD.watchOrders(o => { ORDERS = o; if (!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#liveOrdersList'))) renderLiveOrders(); try { renderReports(); } catch (e) {} });
 </script>
 <button onclick="document.getElementById('zdSet').style.display='flex'" style="position:fixed;right:14px;bottom:14px;z-index:40;background:#1b4332;color:#fff;border:0;border-radius:999px;padding:12px 16px;font-weight:700;font-size:13px">⚙️ Store settings</button>
 <div id="zdSet" style="display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px"><div style="background:#fff;border-radius:16px;padding:18px;width:100%;max-width:360px;font:13px system-ui">
@@ -455,13 +468,14 @@ ZD.watchOrders(o => { ORDERS = o; renderLiveOrders(); try { renderReports(); } c
 <input id="zdPinIn" type="password" inputmode="numeric" placeholder="PIN" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:10px;text-align:center;font-size:18px"><button onclick="zdPinGo()" style="width:100%;margin-top:10px;padding:11px;border:0;border-radius:10px;background:#1b4332;color:#fff;font-weight:700">Continue</button></div></div>
 <script>
 let ZS = null;
-const escA = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+function zdFillIcon() { const v = document.getElementById('newItemCategory').value, c = ((ZS && ZS.categories) || []).find(x => x.name === v); document.getElementById('catIconLink').value = c ? (c.icon || '') : ''; document.getElementById('newCatBox').style.display = v === '__new__' ? 'block' : 'none'; }
 function fillCatSelects() {
   const cs = ZS.categories || [], cn = ZS.containers || [], cc = newItemCategory.value, ct = newItemContainer.value;
   newItemCategory.innerHTML = cs.map(c => `<option value="${escA(c.name)}">${escA(c.name)}</option>`).join('') + '<option value="__new__">➕ Add new category…</option>';
   newItemContainer.innerHTML = '<option value="">— none —</option>' + cn.map(c => `<option value="${escA(c)}">${escA(c)}</option>`).join('') + '<option value="__new__">➕ Add new container type…</option>';
   newItemCategory.value = cc; if (newItemCategory.selectedIndex < 0) newItemCategory.selectedIndex = 0;
   newItemContainer.value = ct; if (newItemContainer.selectedIndex < 0) newItemContainer.selectedIndex = 0;
+  zdFillIcon();
   zdGroups.innerHTML = [...new Set(cs.map(c => c.group))].map(g => `<option value="${escA(g)}">`).join('');
 }
 const zdSha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('zd:' + s)))].map(x => x.toString(16).padStart(2, '0')).join('');
@@ -474,13 +488,14 @@ ZD.watchSettings(s => {
   }
   if (document.getElementById('zdSet').style.display === 'none') { sLat.value = s.lat ?? ''; sLng.value = s.lng ?? ''; sRad.value = s.radiusKm; sFee.value = s.deliveryFee; sFree.value = s.freeAbove; }
 });
+function zdPinErr(m) { const e = document.getElementById('zdPinMsg'); e.innerText = m; e.style.color = '#e11d48'; }
 async function zdPinGo() {
-  const v = zdPinIn.value.trim(); if (!ZS) return; if (v.length < 4) { alert('PIN must be at least 4 digits.'); return; }
+  const v = zdPinIn.value.trim(); if (!ZS) return; if (v.length < 4) { zdPinErr('PIN must be at least 4 digits.'); return; }
   const h = await zdSha(v);
-  if (!ZS.pinHash) await ZD.saveSettings({ pinHash: h }); else if (ZS.pinHash !== h) { alert('Wrong PIN.'); return; }
+  if (!ZS.pinHash) await ZD.saveSettings({ pinHash: h }); else if (ZS.pinHash !== h) { zdPinErr('Wrong PIN.'); return; }
   sessionStorage.setItem('zd_ok', '1'); document.getElementById('zdPin').style.display = 'none';
 }
-function zdLoc() { navigator.geolocation.getCurrentPosition(p => { sLat.value = p.coords.latitude.toFixed(6); sLng.value = p.coords.longitude.toFixed(6); }, () => alert('Could not get location. Allow location access or type the coordinates.'), { enableHighAccuracy: true, timeout: 12000 }); }
+function zdLoc() { navigator.geolocation.getCurrentPosition(p => { sLat.value = p.coords.latitude.toFixed(6); sLng.value = p.coords.longitude.toFixed(6); }, () => showAdminToast('Could not get location. Allow location access or type the coordinates.'), { enableHighAccuracy: true, timeout: 12000 }); }
 async function zdSave() {
   const n = x => x.value === '' ? null : Number(x.value);
   await ZD.saveSettings({ lat: n(sLat), lng: n(sLng), radiusKm: n(sRad) || 3, deliveryFee: n(sFee) ?? 20, freeAbove: n(sFree) ?? 100 });
@@ -493,27 +508,37 @@ async function zdSave() {
 <div id="zdCatList"></div><button onclick="document.getElementById('zdCat').style.display='none'" style="width:100%;margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fff">Close</button></div></div>
 <script>
 const zdIn = 'border:1px solid #ddd;border-radius:8px;padding:6px;width:100%;box-sizing:border-box';
+let zdCatConf = -1;
 function zdCatOpen() {
   const cs = ZS.categories || [];
   document.getElementById('zdCatList').innerHTML = cs.map((c, i) => `<div style="border:1px solid #eee;border-radius:12px;padding:8px;margin-bottom:8px">
-    <div style="display:flex;gap:6px"><input id="ci${i}" value="${escA(c.icon || '🛒')}" style="${zdIn};max-width:56px"><input id="cn${i}" value="${escA(c.name)}" style="${zdIn}"></div>
+    <input id="cn${i}" value="${escA(c.name)}" style="${zdIn}">
+    <input id="ci${i}" value="${escA(c.icon || '🛒')}" placeholder="Icon: emoji or image link" style="${zdIn};margin-top:6px">
     <input id="cg${i}" value="${escA(c.group || 'Other')}" list="zdGroups" style="${zdIn};margin-top:6px">
-    <div style="display:flex;gap:6px;margin-top:6px"><button onclick="zdCatSave(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#1b4332;color:#fff;font-weight:700">Save</button><button onclick="zdCatDel(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#fff1f2;color:#9f1239;font-weight:700">Delete</button></div></div>`).join('');
+    ${zdCatConf === i ? `<div style="margin-top:6px;color:#9f1239;font-weight:700">Delete "${escA(c.name)}"?</div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="zdCatDelYes(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#be123c;color:#fff;font-weight:700">Yes, delete</button><button onclick="zdCatConf=-1;zdCatOpen()" style="flex:1;padding:7px;border:0;border-radius:8px;background:#e7e5e4;font-weight:700">Keep</button></div>`
+    : `<div style="display:flex;gap:6px;margin-top:6px"><button onclick="zdCatSave(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#1b4332;color:#fff;font-weight:700">Save</button><button onclick="zdCatDel(${i})" style="flex:1;padding:7px;border:0;border-radius:8px;background:#fff1f2;color:#9f1239;font-weight:700">Delete</button></div>`}</div>`).join('');
   document.getElementById('zdCat').style.display = 'flex';
 }
 async function zdCatSave(i) {
   const cs = ZS.categories.map(c => ({ ...c })), old = cs[i].name;
-  const name = document.getElementById('cn' + i).value.trim(); if (!name) { alert('Category name cannot be empty.'); return; }
-  if (cs.some((c, j) => j !== i && c.name.toLowerCase() === name.toLowerCase())) { alert('Another category already has this name.'); return; }
+  const name = document.getElementById('cn' + i).value.trim(); if (!name) { showAdminToast('Category name cannot be empty.'); return; }
+  if (cs.some((c, j) => j !== i && catKey(c.name) === catKey(name))) { showAdminToast('Another category already has this name.'); return; }
   cs[i] = { name, group: document.getElementById('cg' + i).value.trim() || 'Other', icon: document.getElementById('ci' + i).value.trim() || '🛒' };
   if (name !== old) await ZD.mutateProducts(l => l.forEach(p => { if (p.category === old) p.category = name; }));
   await ZD.saveSettings({ categories: cs }); showAdminToast('Category saved'); setTimeout(zdCatOpen, 300);
 }
-async function zdCatDel(i) {
-  const cs = ZS.categories, name = cs[i].name, n = inventory.filter(p => p.category === name).length;
-  if (cs.length <= 1) { alert('You need at least one category.'); return; }
-  if (n) { alert(`"${name}" still has ${n} product(s). Move them to another category (Edit product) or delete them first.`); return; }
-  if (!confirm(`Delete category "${name}"?`)) return;
+function zdCatDel(i) {
+  const cs = ZS.categories;
+  if (cs.length <= 1) { showAdminToast('You need at least one category.'); return; }
+  const name = cs[i].name, same = cs.find((c, j) => j !== i && catKey(c.name) === catKey(name));
+  const n = inventory.filter(p => p.category === name).length;
+  if (n && !same) { showAdminToast(`"${name}" still has ${n} product(s). Move them to another category first (Edit product).`, 5000); return; }
+  zdCatConf = i; zdCatOpen();
+}
+async function zdCatDelYes(i) {
+  const cs = ZS.categories, name = cs[i].name, same = cs.find((c, j) => j !== i && catKey(c.name) === catKey(name));
+  zdCatConf = -1;
+  if (same) await ZD.mutateProducts(l => l.forEach(p => { if (p.category === name) p.category = same.name; }));
   await ZD.saveSettings({ categories: cs.filter((c, j) => j !== i) }); showAdminToast('Category deleted'); setTimeout(zdCatOpen, 300);
 }
 </script>
