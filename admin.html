@@ -16,6 +16,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 </style>
 </head>
 <body class="bg-[#fcfbf9] min-h-screen pb-20">
+<div id="zdConn" style="padding:8px 14px;font:700 12px system-ui;background:#fef3c7;color:#92400e">Checking database connection…</div>
 
 <header class="bg-[#1b4332] text-white px-4 py-4 sticky top-0 z-30 shadow-md">
   <div class="max-w-md md:max-w-4xl mx-auto flex items-center justify-between">
@@ -452,7 +453,7 @@ function renderReports() {
 }
 
 ZD.watchProducts(l => { inventory = l; renderAdminPanel(); });
-ZD.watchOrders(o => { ORDERS = o; if (!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#liveOrdersList'))) renderLiveOrders(); try { renderReports(); } catch (e) {} });
+ZD.watchOrders(o => { ORDERS = o; try { window.zdConnCount && window.zdConnCount(o.length); } catch (e) {} if (!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#liveOrdersList'))) renderLiveOrders(); try { renderReports(); } catch (e) {} });
 </script>
 <button onclick="document.getElementById('zdSet').style.display='flex'" style="position:fixed;right:14px;bottom:14px;z-index:40;background:#1b4332;color:#fff;border:0;border-radius:999px;padding:12px 16px;font-weight:700;font-size:13px">⚙️ Store settings</button>
 <div id="zdSet" style="display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px"><div style="background:#fff;border-radius:16px;padding:18px;width:100%;max-width:360px;font:13px system-ui">
@@ -541,6 +542,16 @@ async function zdCatDelYes(i) {
   if (same) await ZD.mutateProducts(l => l.forEach(p => { if (p.category === name) p.category = same.name; }));
   await ZD.saveSettings({ categories: cs.filter((c, j) => j !== i) }); showAdminToast('Category deleted'); setTimeout(zdCatOpen, 300);
 }
+</script>
+<script>
+(async function () {
+  const bar = document.getElementById('zdConn'); let n = null;
+  const set = (ok, msg) => { bar.style.background = ok ? '#dcfce7' : '#fee2e2'; bar.style.color = ok ? '#166534' : '#991b1b'; bar.innerText = msg; };
+  window.zdConnCount = c => { n = c; if (bar.dataset.ok === '1') set(true, `Connected to Firebase ✓ · ${c} order${c === 1 ? '' : 's'} loaded`); };
+  if (!window.ZD_CLOUD) { set(false, 'NOT connected to Firebase: orders from customers\' phones will NOT appear here. Add your Firebase config in zipdash-db.js on the same site as this page.'); return; }
+  try { await ZD.saveSettings({ zdPing: Date.now() }); bar.dataset.ok = '1'; set(true, n == null ? 'Connected to Firebase ✓' : `Connected to Firebase ✓ · ${n} order${n === 1 ? '' : 's'} loaded`); }
+  catch (e) { set(false, 'Firebase is blocking this page (' + ((e && (e.code || e.message)) || 'error') + '). In Firebase, open Firestore Database, then Rules, and allow read and write.'); }
+})();
 </script>
 </body>
 </html>
