@@ -1,7 +1,15 @@
 // zipdash-db.js - shared data layer for index.html and admin.html (keep this file next to them)
 // To share data between phones: create a free Firebase project, enable Firestore, paste the web config below.
 // While FIREBASE_CONFIG is null, everything is saved only in this browser (same as before).
-const FIREBASE_CONFIG = null; // e.g. { apiKey:"...", authDomain:"...", projectId:"..." }
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA0tzIeCwONq_78PdvnD4kIkuNGM1_heGA",
+  authDomain: "zipdash-f79b4.firebaseapp.com",
+  projectId: "zipdash-f79b4",
+  storageBucket: "zipdash-f79b4.firebasestorage.app",
+  messagingSenderId: "877082429491",
+  appId: "1:877082429491:web:903204df5b0ec1369abb46",
+  measurementId: "G-HJCPPBVRG2"
+};
 const SEED_PRODUCTS = [
   // Snacks & Instant
   { id: 1, name: "Kurkure Solid Masti", category: "Snacks & Instant", weight: "Standard Pack", price: 20, mrp: 25, badge: "CRUNCHY", brand: "Kurkure", shelfLife: "6 Months", preference: "Vegetarian", cooking: "Ready to eat", ingredients: "Rice meal, edible vegetable oil, corn meal, spices and condiments.", image: "assets/solid masti.jpg" },
