@@ -116,14 +116,22 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 
   <div id="reportsSection" class="space-y-4 hidden">
     <div class="flex gap-2">
-      <button onclick="setReportPeriod('weekly')" id="btnReportWeekly" class="flex-1 bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition">Weekly (7 Days)</button>
-      <button onclick="setReportPeriod('monthly')" id="btnReportMonthly" class="flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold transition">Monthly (30 Days)</button>
+      <button onclick="setReportPeriod('daily')" id="btnRepD" class="flex-1 bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition">Per Day</button>
+      <button onclick="setReportPeriod('weekly')" id="btnRepW" class="flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold transition">Per Week</button>
+      <button onclick="setReportPeriod('monthly')" id="btnRepM" class="flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold transition">Per Month</button>
     </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Revenue</p><h3 id="reportTotalRevenue" class="text-xl font-extrabold text-[#1b4332] mt-1">₹0</h3></div>
-      <div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">Orders</p><h3 id="reportTotalCount" class="text-xl font-extrabold text-emerald-600 mt-1">0</h3></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h3 id="repTitle" class="font-extrabold text-sm text-[#1b4332]"></h3>
+      <button onclick="downloadReportCsv()" style="border:1px solid #1b4332;color:#1b4332;background:#fff;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap">⬇ Download CSV</button>
     </div>
+    <div id="repCards" class="grid grid-cols-2 gap-3"></div>
+    <div>
+      <p style="font-size:11px;font-weight:800;color:#78716c;text-transform:uppercase;margin:4px 0 6px">Tap a row to see that period's orders</p>
+      <div id="repTable" style="background:#fff;border:1px solid #e6e2dd;border-radius:16px;overflow:hidden"></div>
+    </div>
+    <h4 id="repHistTitle" class="font-extrabold text-sm text-[#1b4332] border-b border-[#e6e2dd] pb-2"></h4>
     <div id="reportsOrdersList" class="space-y-2.5"></div>
+    <div id="repAllTime" style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:12px;font-size:12px;color:#065f46;font-weight:700"></div>
   </div>
 
   <div id="liveOrdersSection" class="space-y-4 hidden">
@@ -131,6 +139,8 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
     <div id="liveOrdersList" class="space-y-3"></div>
     <h3 class="font-extrabold text-sm text-emerald-800 border-b border-emerald-200 pb-2 pt-4">Delivered Orders Archive</h3>
     <div id="deliveredOrdersList" class="space-y-3"></div>
+    <h3 class="font-extrabold text-sm text-rose-800 border-b border-rose-200 pb-2 pt-4">Cancelled Orders <span id="cancelledCount" style="font-weight:700"></span></h3>
+    <div id="cancelledOrdersList" class="space-y-3"></div>
   </div>
 </main>
 
@@ -138,7 +148,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color
 <script>
 let inventory = [], ORDERS = [];
 let activeFilter = 'all';
-let reportPeriod = 'weekly';
+let reportPeriod = 'daily', reportSel = null;
 const orders = () => ORDERS;
 
 function showAdminToast(message) {
@@ -176,7 +186,7 @@ const catKey = n => String(n || '').toLowerCase().replace(/&/g, ' ').replace(/\b
 const riderUrl = id => location.origin + location.pathname.replace(/[^/]*$/, '') + 'rider.html?o=' + id;
 const itemsTxt = o => (o.lines && o.lines.length && o.lines[0].name) ? o.lines.map(l => `${escA(l.name)} × ${l.qty}`).join(', ') : escA(o.items || '');
 let delConfirmId = null;
-function renderLiveOrders() {
+function renderLiveOrdersBase() {
   const allOrders = orders();
   const liveList = document.getElementById('liveOrdersList'), deliveredList = document.getElementById('deliveredOrdersList');
   liveList.innerHTML = ''; deliveredList.innerHTML = '';
@@ -425,6 +435,7 @@ function setReportPeriod(period) {
   renderReports();
 }
 
+
 function renderReports() {
   const allOrders = orders();
   const now = new Date();
@@ -450,6 +461,88 @@ function renderReports() {
         <p class="text-[10px] text-stone-500">🛒 ${ord.items}</p>
       </div>`;
   });
+}
+
+function renderLiveOrders() { renderLiveOrdersBase(); renderCancelled(); }
+function renderCancelled() {
+  const list = orders().filter(o => o.status === 'Cancelled').sort((a, b) => (b.cancelledAt || orderTs(b)) - (a.cancelledAt || orderTs(a)));
+  document.getElementById('cancelledCount').innerText = list.length ? `(${list.length})` : '';
+  const el = document.getElementById('cancelledOrdersList');
+  if (!list.length) { el.innerHTML = '<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No cancelled orders.</div>'; return; }
+  el.innerHTML = list.map(o => {
+    const refund = o.paymentMode === 'Online' && o.paymentStatus === 'Paid';
+    return `<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:16px;padding:12px;font-size:12px">
+      <div style="display:flex;justify-content:space-between;font-weight:800;color:#9f1239"><span>${escA(o.id)} - ${escA(o.customerName || '')}</span><span>₹${o.total}</span></div>
+      <p style="font-size:10px;color:#78716c;margin:2px 0">Placed ${fmtT(orderTs(o))} · Cancelled ${o.cancelledAt ? fmtT(o.cancelledAt) : '-'}</p>
+      <p style="margin:2px 0;color:#44403c">👤 ${escA(o.customerMobile || '')}${cleanEmail(o.customerEmail) ? ' · ' + escA(o.customerEmail) : ''}</p>
+      <p style="margin:2px 0;color:#57534e">🛒 ${itemsTxt(o)}</p>
+      <p style="margin:2px 0;color:#57534e">${escA(o.paymentMode || '')} - ${escA(o.paymentStatus || '')}${o.riderName ? ' · 🛵 ' + escA(o.riderName) + (o.riderPhone ? ' ' + escA(o.riderPhone) : '') : ''}</p>
+      ${refund ? '<p style="margin:4px 0 0;font-weight:800;color:#b45309">⚠ Paid online: refund needed</p>' : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Reports: per day / week / month ---------- */
+const p2 = n => String(n).padStart(2, '0');
+const orderTs = o => { const v = o.placedAt || o.date; const t = typeof v === 'number' ? v : Date.parse(v); return isNaN(t) ? 0 : t; };
+const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`; };
+const weekStart = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; };
+const monthKey = t => { const d = new Date(t); return `${d.getFullYear()}-${p2(d.getMonth() + 1)}`; };
+const keyOf = (p, t) => p === 'daily' ? dayKey(t) : p === 'weekly' ? dayKey(weekStart(t)) : monthKey(t);
+const dLong = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+function keyLabel(p, k) {
+  if (p === 'daily') return new Date(k + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  if (p === 'weekly') { const a = new Date(k + 'T00:00:00'), b = new Date(a); b.setDate(b.getDate() + 6); return `${dLong(a)} - ${dLong(b)} ${b.getFullYear()}`; }
+  return new Date(k + '-01T00:00:00').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+}
+function periodKeys(p) {
+  const out = [], now = Date.now();
+  if (p === 'daily') { for (let i = 0; i < 14; i++) out.push(dayKey(now - i * 864e5)); }
+  else if (p === 'weekly') { const s0 = weekStart(now); for (let i = 0; i < 8; i++) { const d = new Date(s0); d.setDate(d.getDate() - 7 * i); out.push(dayKey(d)); } }
+  else { const d = new Date(); d.setDate(1); for (let i = 0; i < 12; i++) { out.push(`${d.getFullYear()}-${p2(d.getMonth() + 1)}`); d.setMonth(d.getMonth() - 1); } }
+  return out;
+}
+const tally = list => ({ n: list.length, del: list.filter(o => o.status === 'Delivered').length, can: list.filter(o => o.status === 'Cancelled').length, rev: list.filter(o => o.status === 'Delivered').reduce((a, o) => a + Number(o.total || 0), 0) });
+function reportGroups() { const g = {}; orders().forEach(o => { const t = orderTs(o); if (t) (g[keyOf(reportPeriod, t)] = g[keyOf(reportPeriod, t)] || []).push(o); }); return g; }
+function renderReports() {
+  const g = reportGroups(), keys = periodKeys(reportPeriod);
+  if (!reportSel || !keys.includes(reportSel)) reportSel = keys[0];
+  const sel = (g[reportSel] || []).slice().sort((a, b) => orderTs(b) - orderTs(a)), t = tally(sel);
+  const word = { daily: 'Day', weekly: 'Week', monthly: 'Month' }[reportPeriod];
+  document.getElementById('repTitle').innerText = keyLabel(reportPeriod, reportSel);
+  const card = (l, v, c) => `<div class="bg-white p-4 rounded-2xl border border-[#e6e2dd]"><p class="text-[10px] text-stone-400 font-bold uppercase">${l}</p><h3 class="text-xl font-extrabold mt-1" style="color:${c}">${v}</h3></div>`;
+  document.getElementById('repCards').innerHTML = card('Total orders', t.n, '#1b4332') + card('Delivered', t.del, '#059669') + card('Cancelled', t.can, '#be123c') + card('Revenue (delivered)', '₹' + t.rev, '#1b4332');
+  document.getElementById('repTable').innerHTML = `<div style="display:grid;grid-template-columns:1.6fr .7fr .7fr .7fr 1fr;gap:4px;padding:8px 12px;font-size:10px;font-weight:800;color:#78716c;text-transform:uppercase;background:#fafaf9"><span>${word}</span><span style="text-align:center">Orders</span><span style="text-align:center">Done</span><span style="text-align:center">Cancel</span><span style="text-align:right">Revenue</span></div>` +
+    keys.map(k => { const x = tally(g[k] || []); const on = k === reportSel; return `<div onclick="reportSel='${k}';renderReports()" style="display:grid;grid-template-columns:1.6fr .7fr .7fr .7fr 1fr;gap:4px;padding:9px 12px;font-size:12px;border-top:1px solid #f1efe9;cursor:pointer;background:${on ? '#e7f3ec' : '#fff'};font-weight:${on ? 800 : 600};color:#292524"><span>${keyLabel(reportPeriod, k)}</span><span style="text-align:center">${x.n}</span><span style="text-align:center;color:#059669">${x.del}</span><span style="text-align:center;color:#be123c">${x.can}</span><span style="text-align:right">₹${x.rev}</span></div>`; }).join('');
+  document.getElementById('repHistTitle').innerText = `Order history: ${keyLabel(reportPeriod, reportSel)} (${sel.length})`;
+  const pill = st => st === 'Delivered' ? 'background:#dcfce7;color:#166534' : st === 'Cancelled' ? 'background:#ffe4e6;color:#be123c' : 'background:#fef3c7;color:#92400e';
+  document.getElementById('reportsOrdersList').innerHTML = sel.length ? sel.map(o => `<div class="bg-white border rounded-xl p-3 text-xs space-y-1 shadow-sm">
+      <div class="flex justify-between font-bold text-[#1b4332]"><span>${escA(o.id)} (${escA(o.customerName || '')})</span><span>₹${o.total}</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="text-[10px] text-stone-500">${fmtT(orderTs(o))}${o.status === 'Delivered' && o.deliveredAt ? ' → delivered ' + fmtT(o.deliveredAt) : ''}${o.status === 'Cancelled' && o.cancelledAt ? ' → cancelled ' + fmtT(o.cancelledAt) : ''}</span><span style="${pill(o.status)};font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px">${o.status === 'Pending' || o.status === 'Out for Delivery' ? 'Active' : escA(o.status)}</span></div>
+      <p class="text-[10px] text-stone-500">📞 ${escA(o.customerMobile || '')}${cleanEmail(o.customerEmail) ? ' · ' + escA(o.customerEmail) : ''}</p>
+      <p class="text-[10px] text-stone-500">🛒 ${itemsTxt(o)}</p>
+      ${o.riderName ? `<p class="text-[10px] text-emerald-700">🛵 ${escA(o.riderName)} ${escA(o.riderPhone || '')}</p>` : ''}
+    </div>`).join('') : '<div class="bg-white border rounded-2xl p-4 text-center text-stone-400 text-xs">No orders in this period.</div>';
+  const all = tally(orders());
+  document.getElementById('repAllTime').innerHTML = `All time: ${all.n} orders · ${all.del} delivered · ${all.can} cancelled · ₹${all.rev} revenue`;
+}
+function setReportPeriod(p) {
+  reportPeriod = p; reportSel = null;
+  const on = 'flex-1 bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition', off = 'flex-1 bg-white text-stone-700 border border-[#e6e2dd] py-2.5 rounded-xl text-xs font-bold transition';
+  document.getElementById('btnRepD').className = p === 'daily' ? on : off; document.getElementById('btnRepW').className = p === 'weekly' ? on : off; document.getElementById('btnRepM').className = p === 'monthly' ? on : off;
+  renderReports();
+}
+function reportCsv() {
+  const g = reportGroups(), sel = (g[reportSel] || []).slice().sort((a, b) => orderTs(a) - orderTs(b));
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const rows = [['Order ID', 'Placed', 'Delivered/Cancelled', 'Status', 'Customer', 'Mobile', 'Email', 'Items', 'Total', 'Payment', 'Payment status', 'Rider', 'Rider mobile']];
+  sel.forEach(o => rows.push([o.id, fmtT(orderTs(o)), o.status === 'Delivered' ? fmtT(o.deliveredAt) : o.status === 'Cancelled' ? fmtT(o.cancelledAt) : '', o.status, o.customerName, o.customerMobile, cleanEmail(o.customerEmail), (o.lines && o.lines.length && o.lines[0].name) ? o.lines.map(l => l.name + ' x' + l.qty).join('; ') : o.items, o.total, o.paymentMode, o.paymentStatus, o.riderName, o.riderPhone]));
+  return rows.map(r => r.map(q).join(',')).join('\r\n');
+}
+function downloadReportCsv() {
+  const blob = new Blob(['\ufeff' + reportCsv()], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `zipdash-orders-${reportPeriod}-${reportSel}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  showAdminToast('CSV downloaded');
 }
 
 ZD.watchProducts(l => { inventory = l; renderAdminPanel(); });
